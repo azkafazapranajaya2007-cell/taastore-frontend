@@ -6,12 +6,34 @@
   <title>TAASTORE</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-900 text-white min-h-screen">
+<body class="bg-slate-900 text-white min-h-screen pb-12">
   <div class="container mx-auto px-4 py-8">
     <header class="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
       <h1 class="text-3xl font-bold text-amber-400 tracking-wider">TAASTORE</h1>
-      <button onclick="loginAdmin()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 px-3 py-2 rounded border border-slate-700">Admin Login</button>
+      <button id="admin-btn" onclick="toggleAdminPanel()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 px-3 py-2 rounded border border-slate-700">Admin Login</button>
     </header>
+
+    <!-- Panel Admin (Hidden by default) -->
+    <section id="admin-panel" class="hidden mb-10 bg-slate-800 p-6 rounded-xl border border-amber-500/50 shadow-2xl">
+      <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
+        <h2 class="text-lg font-bold text-amber-400">Panel Manajemen Produk</h2>
+        <button onclick="logoutAdmin()" class="text-xs bg-rose-900 text-rose-300 px-2.5 py-1 rounded hover:bg-rose-800">Logout Admin</button>
+      </div>
+
+      <form id="item-form" onsubmit="saveItem(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <input type="hidden" id="item-id">
+        <input type="text" id="item-name" placeholder="Nama Produk" required class="bg-slate-900 border border-slate-700 p-2.5 rounded text-sm focus:outline-none focus:border-amber-400">
+        <input type="number" id="item-price" placeholder="Harga (Rp)" required class="bg-slate-900 border border-slate-700 p-2.5 rounded text-sm focus:outline-none focus:border-amber-400">
+        <select id="item-type" class="bg-slate-900 border border-slate-700 p-2.5 rounded text-sm focus:outline-none focus:border-amber-400">
+          <option value="beli">BELI</option>
+          <option value="jual">JUAL</option>
+        </select>
+        <div class="flex gap-2">
+          <button type="submit" id="form-btn" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold p-2.5 rounded text-sm">Tambah Produk</button>
+          <button type="button" onclick="resetForm()" class="bg-slate-700 text-slate-300 p-2.5 rounded text-sm">Batal</button>
+        </div>
+      </form>
+    </section>
 
     <main>
       <h2 class="text-xl font-semibold mb-6 text-slate-200">Katalog Produk</h2>
@@ -22,50 +44,134 @@
 
   <script>
     const API_URL = "https://taastore-backend.vercel.app";
+    let isAdmin = false;
+    let itemsData = [];
 
     async function loadItems() {
       try {
         const response = await fetch(`${API_URL}/items`);
-        const data = await response.json();
-        
-        const container = document.getElementById("product-list");
-        const loading = document.getElementById("loading");
-        loading.classList.add("hidden");
-        container.innerHTML = "";
-
-        data.forEach(item => {
-          const card = document.createElement("div");
-          card.className = "bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg flex flex-col justify-between";
-          
-          const waText = encodeURIComponent(`Halo CS TAASTORE, saya mau transaksi:\n- Item: ${item.name}\n- Harga: Rp ${item.price.toLocaleString('id-ID')}`);
-          
-          card.innerHTML = `
-            <div>
-              <div class="flex justify-between items-start mb-2">
-                <h3 class="text-lg font-bold text-white">${item.name}</h3>
-                <span class="text-xs font-semibold uppercase px-2 py-1 rounded ${item.type === 'beli' ? 'bg-emerald-900 text-emerald-300' : 'bg-blue-900 text-blue-300'}">${item.type}</span>
-              </div>
-              <p class="text-2xl font-extrabold text-amber-400 mb-4">Rp ${item.price.toLocaleString('id-ID')}</p>
-            </div>
-            <a href="https://wa.me/6281234567890?text=${waText}" target="_blank" class="w-full text-center bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 px-4 rounded-lg transition duration-200">
-              Beli via WhatsApp
-            </a>
-          `;
-          container.appendChild(card);
-        });
+        itemsData = await response.json();
+        renderProducts();
       } catch (err) {
         document.getElementById("loading").innerText = "Gagal memuat barang. Cek koneksi backend.";
         document.getElementById("loading").className = "text-rose-500";
       }
     }
 
-    function loginAdmin() {
-      const inputPassword = prompt("Masukkan Password Admin TAASTORE:");
-      if (inputPassword === "TAASTORE.ID") {
-        alert("Login Admin Berhasil!");
-      } else if (inputPassword) {
-        alert("Password Salah!");
+    function renderProducts() {
+      const container = document.getElementById("product-list");
+      const loading = document.getElementById("loading");
+      loading.classList.add("hidden");
+      container.innerHTML = "";
+
+      itemsData.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg flex flex-col justify-between";
+        
+        const waText = encodeURIComponent(`Halo CS TAASTORE, saya mau transaksi:\n- Item: ${item.name}\n- Harga: Rp ${item.price.toLocaleString('id-ID')}`);
+        
+        card.innerHTML = `
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="text-lg font-bold text-white">${item.name}</h3>
+              <span class="text-xs font-semibold uppercase px-2 py-1 rounded ${item.type === 'beli' ? 'bg-emerald-900 text-emerald-300' : 'bg-blue-900 text-blue-300'}">${item.type}</span>
+            </div>
+            <p class="text-2xl font-extrabold text-amber-400 mb-4">Rp ${item.price.toLocaleString('id-ID')}</p>
+          </div>
+          <div>
+            <a href="https://wa.me/6281234567890?text=${waText}" target="_blank" class="w-full block text-center bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 px-4 rounded-lg transition duration-200">
+              Beli via WhatsApp
+            </a>
+            ${isAdmin ? `
+              <div class="flex gap-2 mt-3 pt-3 border-t border-slate-700">
+                <button onclick="editItem(${item.id})" class="flex-1 bg-blue-600 hover:bg-blue-500 text-xs py-1.5 rounded font-medium">Edit Harga</button>
+                <button onclick="deleteItem(${item.id})" class="flex-1 bg-rose-600 hover:bg-rose-500 text-xs py-1.5 rounded font-medium">Hapus</button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function toggleAdminPanel() {
+      if (!isAdmin) {
+        const inputPassword = prompt("Masukkan Password Admin TAASTORE:");
+        if (inputPassword === "TAASTORE.ID") {
+          isAdmin = true;
+          document.getElementById("admin-panel").classList.remove("hidden");
+          document.getElementById("admin-btn").innerText = "Admin Active";
+          document.getElementById("admin-btn").className = "bg-emerald-800 text-emerald-200 text-xs px-3 py-2 rounded border border-emerald-600 font-bold";
+          renderProducts();
+        } else if (inputPassword) {
+          alert("Password Salah!");
+        }
       }
+    }
+
+    function logoutAdmin() {
+      isAdmin = false;
+      document.getElementById("admin-panel").classList.add("hidden");
+      document.getElementById("admin-btn").innerText = "Admin Login";
+      document.getElementById("admin-btn").className = "bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 px-3 py-2 rounded border border-slate-700";
+      resetForm();
+      renderProducts();
+    }
+
+    function editItem(id) {
+      const item = itemsData.find(i => i.id === id);
+      if (item) {
+        document.getElementById("item-id").value = item.id;
+        document.getElementById("item-name").value = item.name;
+        document.getElementById("item-price").value = item.price;
+        document.getElementById("item-type").value = item.type;
+        document.getElementById("form-btn").innerText = "Simpan Perubahan";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    async function saveItem(e) {
+      e.preventDefault();
+      const id = document.getElementById("item-id").value;
+      const name = document.getElementById("item-name").value;
+      const price = parseFloat(document.getElementById("item-price").value);
+      const type = document.getElementById("item-type").value;
+
+      const payload = { name, price, type, stock_status: "ready" };
+
+      if (id) {
+        // UPDATE (PUT)
+        await fetch(`${API_URL}/items/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        // CREATE (POST)
+        await fetch(`${API_URL}/items`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      }
+
+      resetForm();
+      loadItems();
+    }
+
+    async function deleteItem(id) {
+      if (confirm("Yakin ingin menghapus produk ini?")) {
+        await fetch(`${API_URL}/items/${id}`, { method: "DELETE" });
+        loadItems();
+      }
+    }
+
+    function resetForm() {
+      document.getElementById("item-id").value = "";
+      document.getElementById("item-name").value = "";
+      document.getElementById("item-price").value = "";
+      document.getElementById("item-type").value = "beli";
+      document.getElementById("form-btn").innerText = "Tambah Produk";
     }
 
     loadItems();
