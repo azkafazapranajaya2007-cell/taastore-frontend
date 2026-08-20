@@ -1,5 +1,74 @@
-const API_URL = "https://taastore-backend.vercel.app";
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TAASTORE</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+  <div class="container mx-auto px-4 py-8">
+    <header class="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
+      <h1 class="text-3xl font-bold text-amber-400 tracking-wider">TAASTORE</h1>
+      <button onclick="loginAdmin()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 px-3 py-2 rounded border border-slate-700">Admin Login</button>
+    </header>
 
-fetch(`${API_URL}/items`)
-  .then(res => res.json())
-  .then(data => console.log(data));
+    <main>
+      <h2 class="text-xl font-semibold mb-6 text-slate-200">Katalog Produk</h2>
+      <div id="loading" class="text-slate-400">Memuat data barang...</div>
+      <div id="product-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+    </main>
+  </div>
+
+  <script>
+    const API_URL = "https://taastore-backend.vercel.app";
+
+    async function loadItems() {
+      try {
+        const response = await fetch(`${API_URL}/items`);
+        const data = await response.json();
+        
+        const container = document.getElementById("product-list");
+        const loading = document.getElementById("loading");
+        loading.classList.add("hidden");
+        container.innerHTML = "";
+
+        data.forEach(item => {
+          const card = document.createElement("div");
+          card.className = "bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg flex flex-col justify-between";
+          
+          const waText = encodeURIComponent(`Halo CS TAASTORE, saya mau transaksi:\n- Item: ${item.name}\n- Harga: Rp ${item.price.toLocaleString('id-ID')}`);
+          
+          card.innerHTML = `
+            <div>
+              <div class="flex justify-between items-start mb-2">
+                <h3 class="text-lg font-bold text-white">${item.name}</h3>
+                <span class="text-xs font-semibold uppercase px-2 py-1 rounded ${item.type === 'beli' ? 'bg-emerald-900 text-emerald-300' : 'bg-blue-900 text-blue-300'}">${item.type}</span>
+              </div>
+              <p class="text-2xl font-extrabold text-amber-400 mb-4">Rp ${item.price.toLocaleString('id-ID')}</p>
+            </div>
+            <a href="https://wa.me/6281234567890?text=${waText}" target="_blank" class="w-full text-center bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 px-4 rounded-lg transition duration-200">
+              Beli via WhatsApp
+            </a>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        document.getElementById("loading").innerText = "Gagal memuat barang. Cek koneksi backend.";
+        document.getElementById("loading").className = "text-rose-500";
+      }
+    }
+
+    function loginAdmin() {
+      const inputPassword = prompt("Masukkan Password Admin TAASTORE:");
+      if (inputPassword === "TAASTORE.ID") {
+        alert("Login Admin Berhasil!");
+      } else if (inputPassword) {
+        alert("Password Salah!");
+      }
+    }
+
+    loadItems();
+  </script>
+</body>
+</html>
