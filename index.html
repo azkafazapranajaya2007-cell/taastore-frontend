@@ -76,7 +76,7 @@
     </main>
   </div>
 
-  <!-- Modal Checkout -->
+  <!-- Modal Checkout Form -->
   <div id="cart-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-3 mb-4">
@@ -84,28 +84,54 @@
         <button onclick="closeCartModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
       </div>
       
-      <div class="space-y-4">
-        <div>
-          <label class="text-xs text-slate-400 mb-1 block">Harga Satuan</label>
-          <div class="text-lg font-bold text-white" id="cart-item-price">Rp 0</div>
-        </div>
-        
-        <div>
-          <label class="text-xs text-slate-400 mb-1 block">Jumlah Pembelian / Kuantitas</label>
-          <input type="number" id="cart-qty" min="1" value="1" oninput="calculateTotal()" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400">
+      <form onsubmit="sendToWA(event)" class="space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">Harga Satuan</label>
+            <div class="text-base font-bold text-white" id="cart-item-price">Rp 0</div>
+          </div>
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">Jumlah / Qty</label>
+            <input type="number" id="cart-qty" min="1" value="1" oninput="calculateTotal()" required class="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400">
+          </div>
         </div>
 
-        <div class="bg-slate-900 p-4 rounded-xl border border-slate-700/50">
-          <div class="flex justify-between text-sm text-slate-400 mb-1">
-            <span>Estimasi Total:</span>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Nama Pembeli</label>
+          <input type="text" id="buyer-name" placeholder="Masukkan nama kamu" required class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">GrowID / ID Game</label>
+            <input type="text" id="buyer-game-id" placeholder="Contoh: Azka07" required class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400">
           </div>
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">World Name</label>
+            <input type="text" id="buyer-world" placeholder="Contoh: TAASTORE" required class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400">
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Metode Pembayaran</label>
+          <select id="buyer-payment" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400">
+            <option value="QRIS">QRIS All Payment</option>
+            <option value="BCA">Bank BCA</option>
+            <option value="DANA">DANA</option>
+            <option value="GOPAY">GoPay</option>
+            <option value="Seabank">Seabank</option>
+          </select>
+        </div>
+
+        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-700/50 mt-2">
+          <div class="text-xs text-slate-400 mb-0.5">Total Pembayaran:</div>
           <div class="text-2xl font-black text-amber-400" id="cart-total-price">Rp 0</div>
         </div>
 
-        <button onclick="sendToWA()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-xl transition">
-          Lanjutkan Pesan ke WhatsApp
+        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-xl transition mt-2">
+          Kirim Pesanan ke WhatsApp CS
         </button>
-      </div>
+      </form>
     </div>
   </div>
 
@@ -191,7 +217,7 @@
 
           <div>
             <button onclick="openCartModal(${item.id})" ${isOut ? 'disabled' : ''} class="w-full text-center ${isOut ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-600 text-slate-950'} font-bold py-2.5 px-4 rounded-lg transition duration-200">
-              ${isOut ? 'Stok Habis' : 'Beli / Hitung Total'}
+              ${isOut ? 'Stok Habis' : 'Beli Sekarang'}
             </button>
             ${isAdmin ? `
               <div class="flex gap-2 mt-3 pt-3 border-t border-slate-700">
@@ -229,12 +255,31 @@
       document.getElementById("cart-total-price").innerText = `Rp ${total.toLocaleString('id-ID')}`;
     }
 
-    function sendToWA() {
+    function sendToWA(e) {
+      e.preventDefault();
       if (!selectedItem) return;
+
       const qty = parseInt(document.getElementById("cart-qty").value) || 1;
       const total = selectedItem.price * qty;
+      const buyerName = document.getElementById("buyer-name").value;
+      const gameId = document.getElementById("buyer-game-id").value;
+      const world = document.getElementById("buyer-world").value;
+      const payment = document.getElementById("buyer-payment").value;
 
-      const waText = encodeURIComponent(`Halo CS TAASTORE, saya mau transaksi:\n- Item: ${selectedItem.name}\n- Kuantitas: ${qty}x\n- Total Harga: Rp ${total.toLocaleString('id-ID')}`);
+      const textMessage = 
+`🛒 *FORM PESANAN TAASTORE*
+----------------------------------------
+• *Nama Pembeli*: ${buyerName}
+• *Produk*: ${selectedItem.name}
+• *Jumlah*: ${qty}x
+• *Total Harga*: Rp ${total.toLocaleString('id-ID')}
+• *GrowID / ID Game*: ${gameId}
+• *World Name*: ${world}
+• *Metode Bayar*: ${payment}
+----------------------------------------
+Mohon diproses min, terima kasih! 🙏`;
+
+      const waText = encodeURIComponent(textMessage);
       window.open(`https://wa.me/6281234567890?text=${waText}`, '_blank');
       closeCartModal();
     }
