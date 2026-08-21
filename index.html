@@ -8,19 +8,33 @@
 </head>
 <body class="bg-slate-900 text-white min-h-screen pb-12">
   <div class="container mx-auto px-4 py-8">
-    <header class="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
+    
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
       <h1 class="text-3xl font-bold text-amber-400 tracking-wider">TAASTORE</h1>
       <button id="admin-btn" onclick="toggleAdminPanel()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 px-3 py-2 rounded border border-slate-700">Admin Login</button>
     </header>
 
-    <!-- Panel Admin (Hidden by default) -->
+    <!-- Banner Promosi -->
+    <div class="mb-8 p-6 bg-gradient-to-r from-amber-500/20 via-slate-800 to-slate-800 rounded-2xl border border-amber-500/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
+      <div>
+        <span class="bg-amber-500 text-slate-950 font-extrabold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">PROMO SPESIAL</span>
+        <h2 class="text-xl font-bold text-white mt-2">Gems & Items Ready Stock!</h2>
+        <p class="text-slate-400 text-sm">Transaksi cepat, aman, dan terpercaya 24/7 via WhatsApp CS.</p>
+      </div>
+      <div class="text-xs text-amber-400 bg-amber-500/10 px-3 py-2 rounded-lg border border-amber-500/20">
+        ⚡ Garansi Proses Cepat
+      </div>
+    </div>
+
+    <!-- Panel Admin (Hidden) -->
     <section id="admin-panel" class="hidden mb-10 bg-slate-800 p-6 rounded-xl border border-amber-500/50 shadow-2xl">
       <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
         <h2 class="text-lg font-bold text-amber-400">Panel Manajemen Produk</h2>
         <button onclick="logoutAdmin()" class="text-xs bg-rose-900 text-rose-300 px-2.5 py-1 rounded hover:bg-rose-800">Logout Admin</button>
       </div>
 
-      <form id="item-form" onsubmit="saveItem(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <form id="item-form" onsubmit="saveItem(event)" class="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6">
         <input type="hidden" id="item-id">
         <input type="text" id="item-name" placeholder="Nama Produk" required class="bg-slate-900 border border-slate-700 p-2.5 rounded text-sm focus:outline-none focus:border-amber-400">
         <input type="number" id="item-price" placeholder="Harga (Rp)" required class="bg-slate-900 border border-slate-700 p-2.5 rounded text-sm focus:outline-none focus:border-amber-400">
@@ -28,63 +42,153 @@
           <option value="beli">BELI</option>
           <option value="jual">JUAL</option>
         </select>
-        <div class="flex gap-2">
+        <select id="item-status" class="bg-slate-900 border border-slate-700 p-2.5 rounded text-sm focus:outline-none focus:border-amber-400">
+          <option value="ready">Ready</option>
+          <option value="limited">Limited</option>
+          <option value="empty">Out of Stock</option>
+        </select>
+        <div class="flex gap-2 col-span-1 md:col-span-5">
           <button type="submit" id="form-btn" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold p-2.5 rounded text-sm">Tambah Produk</button>
           <button type="button" onclick="resetForm()" class="bg-slate-700 text-slate-300 p-2.5 rounded text-sm">Batal</button>
         </div>
       </form>
     </section>
 
+    <!-- Controls: Search & Filter -->
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+      <div class="w-full md:w-1/3">
+        <input type="text" id="search-input" oninput="filterProducts()" placeholder="🔍 Cari nama produk..." class="w-full bg-slate-800 border border-slate-700 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-amber-400">
+      </div>
+      <div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-1">
+        <button onclick="setFilter('all')" id="filter-all" class="filter-btn active-filter bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition">Semua</button>
+        <button onclick="setFilter('beli')" id="filter-beli" class="filter-btn bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-2 rounded-lg text-xs transition">Katalog Beli</button>
+        <button onclick="setFilter('jual')" id="filter-jual" class="filter-btn bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-2 rounded-lg text-xs transition">Katalog Jual</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
     <main>
-      <h2 class="text-xl font-semibold mb-6 text-slate-200">Katalog Produk</h2>
-      <div id="loading" class="text-slate-400">Memuat data barang...</div>
+      <div id="loading" class="text-slate-400 py-8 text-center">Memuat data barang...</div>
       <div id="product-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
     </main>
+
+  </div>
+
+  <!-- Modal Checkout / Kalkulator -->
+  <div id="cart-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3 mb-4">
+        <h3 class="font-bold text-lg text-amber-400" id="cart-item-name">Detail Pesanan</h3>
+        <button onclick="closeCartModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+      </div>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Harga Satuan</label>
+          <div class="text-lg font-bold text-white" id="cart-item-price">Rp 0</div>
+        </div>
+        
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Jumlah Pembelian / Kuantitas</label>
+          <input type="number" id="cart-qty" min="1" value="1" oninput="calculateTotal()" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400">
+        </div>
+
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-700/50">
+          <div class="flex justify-between text-sm text-slate-400 mb-1">
+            <span>Estimasi Total:</span>
+          </div>
+          <div class="text-2xl font-black text-amber-400" id="cart-total-price">Rp 0</div>
+        </div>
+
+        <button onclick="sendToWA()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-xl transition">
+          Lanjutkan Pesan ke WhatsApp
+        </button>
+      </div>
+    </div>
   </div>
 
   <script>
     const API_URL = "https://taastore-backend.vercel.app";
     let isAdmin = false;
     let itemsData = [];
+    let activeFilter = 'all';
+    let selectedItem = null;
 
     async function loadItems() {
       try {
         const response = await fetch(`${API_URL}/items`);
         itemsData = await response.json();
-        renderProducts();
+        filterProducts();
       } catch (err) {
         document.getElementById("loading").innerText = "Gagal memuat barang. Cek koneksi backend.";
-        document.getElementById("loading").className = "text-rose-500";
+        document.getElementById("loading").className = "text-rose-500 text-center py-8";
       }
     }
 
-    function renderProducts() {
+    function setFilter(type) {
+      activeFilter = type;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.className = "filter-btn bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-2 rounded-lg text-xs transition";
+      });
+      document.getElementById(`filter-${type}`).className = "filter-btn active-filter bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition";
+      filterProducts();
+    }
+
+    function filterProducts() {
+      const searchKeyword = document.getElementById("search-input").value.toLowerCase();
+      const filtered = itemsData.filter(item => {
+        const matchSearch = item.name.toLowerCase().includes(searchKeyword);
+        const matchType = activeFilter === 'all' || item.type === activeFilter;
+        return matchSearch && matchType;
+      });
+      renderProducts(filtered);
+    }
+
+    function renderProducts(data) {
       const container = document.getElementById("product-list");
       const loading = document.getElementById("loading");
       loading.classList.add("hidden");
       container.innerHTML = "";
 
-      itemsData.forEach(item => {
+      if (data.length === 0) {
+        container.innerHTML = `<div class="col-span-full text-center py-8 text-slate-500">Tidak ada produk ditemukan.</div>`;
+        return;
+      }
+
+      data.forEach(item => {
         const card = document.createElement("div");
-        card.className = "bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg flex flex-col justify-between";
+        card.className = "bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg flex flex-col justify-between relative overflow-hidden";
+
+        // Stock Status Badge Config
+        let stockBadge = `<span class="bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 text-[10px] font-bold px-2 py-0.5 rounded">READY</span>`;
+        let isOut = false;
         
-        const waText = encodeURIComponent(`Halo CS TAASTORE, saya mau transaksi:\n- Item: ${item.name}\n- Harga: Rp ${item.price.toLocaleString('id-ID')}`);
-        
+        if (item.stock_status === 'limited') {
+          stockBadge = `<span class="bg-amber-900/80 text-amber-300 border border-amber-700/50 text-[10px] font-bold px-2 py-0.5 rounded">LIMITED</span>`;
+        } else if (item.stock_status === 'empty') {
+          stockBadge = `<span class="bg-rose-900/80 text-rose-300 border border-rose-700/50 text-[10px] font-bold px-2 py-0.5 rounded">OUT OF STOCK</span>`;
+          isOut = true;
+        }
+
         card.innerHTML = `
           <div>
             <div class="flex justify-between items-start mb-2">
               <h3 class="text-lg font-bold text-white">${item.name}</h3>
-              <span class="text-xs font-semibold uppercase px-2 py-1 rounded ${item.type === 'beli' ? 'bg-emerald-900 text-emerald-300' : 'bg-blue-900 text-blue-300'}">${item.type}</span>
+              <div class="flex gap-1.5 items-center">
+                ${stockBadge}
+                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded ${item.type === 'beli' ? 'bg-blue-900/80 text-blue-300 border border-blue-700/50' : 'bg-purple-900/80 text-purple-300 border border-purple-700/50'}">${item.type}</span>
+              </div>
             </div>
             <p class="text-2xl font-extrabold text-amber-400 mb-4">Rp ${item.price.toLocaleString('id-ID')}</p>
           </div>
+
           <div>
-            <a href="https://wa.me/6281234567890?text=${waText}" target="_blank" class="w-full block text-center bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-2.5 px-4 rounded-lg transition duration-200">
-              Beli via WhatsApp
-            </a>
+            <button onclick="openCartModal(${item.id})" ${isOut ? 'disabled' : ''} class="w-full text-center ${isOut ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-600 text-slate-950'} font-bold py-2.5 px-4 rounded-lg transition duration-200">
+              ${isOut ? 'Stok Habis' : 'Beli / Hitung Total'}
+            </button>
             ${isAdmin ? `
               <div class="flex gap-2 mt-3 pt-3 border-t border-slate-700">
-                <button onclick="editItem(${item.id})" class="flex-1 bg-blue-600 hover:bg-blue-500 text-xs py-1.5 rounded font-medium">Edit Harga</button>
+                <button onclick="editItem(${item.id})" class="flex-1 bg-blue-600 hover:bg-blue-500 text-xs py-1.5 rounded font-medium">Edit</button>
                 <button onclick="deleteItem(${item.id})" class="flex-1 bg-rose-600 hover:bg-rose-500 text-xs py-1.5 rounded font-medium">Hapus</button>
               </div>
             ` : ''}
@@ -94,6 +198,42 @@
       });
     }
 
+    // Modal & Quantity Logic
+    function openCartModal(id) {
+      selectedItem = itemsData.find(i => i.id === id);
+      if (!selectedItem) return;
+
+      document.getElementById("cart-item-name").innerText = selectedItem.name;
+      document.getElementById("cart-item-price").innerText = `Rp ${selectedItem.price.toLocaleString('id-ID')}`;
+      document.getElementById("cart-qty").value = 1;
+      calculateTotal();
+
+      document.getElementById("cart-modal").classList.remove("hidden");
+    }
+
+    function closeCartModal() {
+      document.getElementById("cart-modal").classList.add("hidden");
+      selectedItem = null;
+    }
+
+    function calculateTotal() {
+      if (!selectedItem) return;
+      const qty = parseInt(document.getElementById("cart-qty").value) || 1;
+      const total = selectedItem.price * qty;
+      document.getElementById("cart-total-price").innerText = `Rp ${total.toLocaleString('id-ID')}`;
+    }
+
+    function sendToWA() {
+      if (!selectedItem) return;
+      const qty = parseInt(document.getElementById("cart-qty").value) || 1;
+      const total = selectedItem.price * qty;
+
+      const waText = encodeURIComponent(`Halo CS TAASTORE, saya mau transaksi:\n- Item: ${selectedItem.name}\n- Kuantitas: ${qty}x\n- Total Harga: Rp ${total.toLocaleString('id-ID')}`);
+      window.open(`https://wa.me/6281234567890?text=${waText}`, '_blank');
+      closeCartModal();
+    }
+
+    // Admin Auth Logic
     function toggleAdminPanel() {
       if (!isAdmin) {
         const inputPassword = prompt("Masukkan Password Admin TAASTORE:");
@@ -102,7 +242,7 @@
           document.getElementById("admin-panel").classList.remove("hidden");
           document.getElementById("admin-btn").innerText = "Admin Active";
           document.getElementById("admin-btn").className = "bg-emerald-800 text-emerald-200 text-xs px-3 py-2 rounded border border-emerald-600 font-bold";
-          renderProducts();
+          filterProducts();
         } else if (inputPassword) {
           alert("Password Salah!");
         }
@@ -115,7 +255,7 @@
       document.getElementById("admin-btn").innerText = "Admin Login";
       document.getElementById("admin-btn").className = "bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 px-3 py-2 rounded border border-slate-700";
       resetForm();
-      renderProducts();
+      filterProducts();
     }
 
     function editItem(id) {
@@ -125,6 +265,7 @@
         document.getElementById("item-name").value = item.name;
         document.getElementById("item-price").value = item.price;
         document.getElementById("item-type").value = item.type;
+        document.getElementById("item-status").value = item.stock_status || "ready";
         document.getElementById("form-btn").innerText = "Simpan Perubahan";
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
@@ -136,18 +277,17 @@
       const name = document.getElementById("item-name").value;
       const price = parseFloat(document.getElementById("item-price").value);
       const type = document.getElementById("item-type").value;
+      const stock_status = document.getElementById("item-status").value;
 
-      const payload = { name, price, type, stock_status: "ready" };
+      const payload = { name, price, type, stock_status };
 
       if (id) {
-        // UPDATE (PUT)
         await fetch(`${API_URL}/items/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
       } else {
-        // CREATE (POST)
         await fetch(`${API_URL}/items`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -171,6 +311,7 @@
       document.getElementById("item-name").value = "";
       document.getElementById("item-price").value = "";
       document.getElementById("item-type").value = "beli";
+      document.getElementById("item-status").value = "ready";
       document.getElementById("form-btn").innerText = "Tambah Produk";
     }
 
