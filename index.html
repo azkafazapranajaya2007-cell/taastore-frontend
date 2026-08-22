@@ -57,17 +57,41 @@
       </form>
     </section>
 
-    <!-- Search & Filter -->
-    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-      <div class="w-full md:w-1/3">
-        <input type="text" id="search-input" oninput="filterProducts()" placeholder="🔍 Cari nama produk..." class="w-full bg-slate-800 border border-slate-700 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:border-amber-400">
-      </div>
-      <div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-1">
-        <button onclick="setFilter('all')" id="filter-all" class="filter-btn active-filter bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition">Semua</button>
-        <button onclick="setFilter('beli')" id="filter-beli" class="filter-btn bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-2 rounded-lg text-xs transition">Katalog Beli</button>
-        <button onclick="setFilter('jual')" id="filter-jual" class="filter-btn bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-2 rounded-lg text-xs transition">Katalog Jual</button>
-      </div>
-    </div>
+<!-- Search & Filter -->
+<div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+  <!-- Input Search -->
+  <div class="w-full md:w-1/3">
+    <input 
+      type="text" 
+      id="search-input" 
+      oninput="filterProducts()" 
+      placeholder="🔍 Cari nama produk..." 
+      class="w-full bg-slate-800 border border-slate-700 px-4 py-2.5 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition text-sm"
+    />
+  </div>
+
+  <!-- Tombol Tab Filter -->
+  <div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-1">
+    <button 
+      onclick="setFilter('all')" 
+      id="filter-all" 
+      class="filter-btn active-filter bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition whitespace-nowrap">
+      Semua
+    </button>
+    <button 
+      onclick="setFilter('beli')" 
+      id="filter-beli" 
+      class="filter-btn bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-2 rounded-lg text-xs transition whitespace-nowrap">
+      Katalog Beli
+    </button>
+    <button 
+      onclick="setFilter('jual')" 
+      id="filter-jual" 
+      class="filter-btn bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-2 rounded-lg text-xs transition whitespace-nowrap">
+      Katalog Jual
+    </button>
+  </div>
+</div>
 
     <!-- Main Content -->
     <main>
@@ -199,6 +223,62 @@
         }
 
        const defaultImage = 'https://placehold.co/400x250/1e293b/f59e0b?text=TAASTORE';
+
+// Variable Filter
+let activeFilter = 'all';
+
+// Fungsi Filter & Search Utama
+function filterProducts() {
+  const container = document.getElementById("items-container");
+  if (!container) return;
+
+  // Sembunyikan elemen loading jika ada
+  const loadingEl = document.getElementById("loading");
+  if (loadingEl) loadingEl.style.display = 'none';
+
+  // Ambil teks dari kolom pencarian
+  const searchInput = document.getElementById("search-input");
+  const searchQuery = searchInput ? searchInput.value.toLowerCase() : "";
+
+  // Saring data dari array itemsData
+  const filtered = itemsData.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery);
+    const itemType = (item.type || 'BELI').toLowerCase();
+    const matchesFilter = activeFilter === 'all' || itemType === activeFilter;
+
+    return matchesSearch && matchesFilter;
+  });
+
+  // Tampilan jika hasil pencarian kosong
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="col-span-full text-center text-slate-400 py-12">Produk tidak ditemukan.</div>`;
+    return;
+  }
+
+  // Panggil fungsi render bawaan kamu
+  renderItems(filtered);
+}
+
+// Fungsi Pindah Tab Filter
+function setFilter(filterType) {
+  activeFilter = filterType;
+
+  // Elemen Tombol
+  const btnAll = document.getElementById('filter-all');
+  const btnBeli = document.getElementById('filter-beli');
+  const btnJual = document.getElementById('filter-jual');
+
+  // Utility Class Tailwind
+  const activeClass = "filter-btn active-filter bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition whitespace-nowrap";
+  const inactiveClass = "filter-btn bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-2 rounded-lg text-xs transition whitespace-nowrap";
+
+  if (btnAll) btnAll.className = filterType === 'all' ? activeClass : inactiveClass;
+  if (btnBeli) btnBeli.className = filterType === 'beli' ? activeClass : inactiveClass;
+  if (btnJual) btnJual.className = filterType === 'jual' ? activeClass : inactiveClass;
+
+  // Jalankan penyaringan ulang secara instant
+  filterProducts();
+}
 
 const imageHtml = `<img 
     src="${item.image_url && item.image_url.trim() !== '' ? item.image_url : defaultImage}" 
