@@ -198,9 +198,14 @@
           isOut = true;
         }
 
-        const imageHtml = item.image_url 
-          ? `<img src="${item.image_url}" alt="${item.name}" class="w-full h-36 object-cover rounded-lg mb-3 bg-slate-900">`
-          : '';
+       const defaultImage = 'https://placehold.co/400x250/1e293b/f59e0b?text=TAASTORE';
+
+const imageHtml = `<img 
+    src="${item.image_url && item.image_url.trim() !== '' ? item.image_url : defaultImage}" 
+    alt="${item.name}" 
+    onerror="this.onerror=null; this.src='${defaultImage}';" 
+    class="w-full h-36 object-cover rounded-lg mb-3 bg-slate-900"
+/>`;
 
         card.innerHTML = `
           <div>
