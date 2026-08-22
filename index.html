@@ -178,6 +178,18 @@
       }
     }
 
+function showToast(message, isError = false) {
+  const toast = document.getElementById("toast");
+  const toastMessage = document.getElementById("toast-message");
+  
+  toastMessage.innerText = message;
+  toast.className = `fixed bottom-5 right-5 block ${isError ? 'bg-rose-600' : 'bg-emerald-600'} text-white px-5 py-3 rounded-lg shadow-xl font-medium transition-all duration-300 z-50`;
+  
+  setTimeout(() => {
+    toast.className = toast.className.replace("block", "hidden");
+  }, 3000);
+}
+
     function setFilter(type) {
       activeFilter = type;
       document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -465,5 +477,10 @@ Mohon diproses min, terima kasih! 🙏`;
 
     loadItems();
   </script>
+<!-- Toast Notification -->
+<div id="toast" class="fixed bottom-5 right-5 hidden bg-emerald-600 text-white px-5 py-3 rounded-lg shadow-xl font-medium transition-all duration-300 z-50">
+  <span id="toast-message">Notifikasi</span>
+</div>
+
 </body>
 </html>
