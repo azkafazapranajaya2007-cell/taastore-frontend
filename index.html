@@ -47,7 +47,7 @@
 
 <body class="bg-slate-950 text-white min-h-screen pb-12 relative overflow-x-hidden font-sans bg-grid-pattern">
 
-  <!-- Glow Ambient Orbs (Efek Lampu Background) -->
+  <!-- Glow Ambient Orbs -->
   <div class="fixed -top-32 -left-32 w-96 h-96 bg-cyan-500/15 rounded-full blur-[120px] pointer-events-none z-0"></div>
   <div class="fixed -bottom-32 -right-32 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
@@ -156,10 +156,32 @@
       </div>
 
       <!-- Main Content -->
-      <main>
+      <main class="mb-12">
         <div id="loading" class="text-slate-400 py-8 text-center">Memuat data barang...</div>
         <div id="product-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
       </main>
+
+      <!-- Section Testimoni / Review Pelanggan -->
+      <section class="mt-14 mb-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-amber-400 font-bold text-sm">⭐ 4.9 / 5.0</span>
+              <span class="text-xs text-slate-500">• (100+ Transaksi Sukses)</span>
+            </div>
+            <h2 class="text-2xl font-black text-white tracking-wide mt-1">Ulasan Pelanggan</h2>
+            <p class="text-slate-400 text-xs mt-0.5">Pengalaman langsung dari pembeli di TAASTORE</p>
+          </div>
+          <button onclick="openReviewModal()" class="bg-slate-900 hover:bg-slate-800 border border-amber-500/30 text-amber-400 font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-lg">
+            ✍️ Tulis Testimoni
+          </button>
+        </div>
+
+        <div id="review-list" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Ulasan akan dimuat secara dinamis via JavaScript -->
+        </div>
+      </section>
+
     </div>
 
     <!-- Modal Checkout Form -->
@@ -224,6 +246,41 @@
       </div>
     </div>
 
+    <!-- Modal Tambah Review -->
+    <div id="review-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+          <h3 class="font-bold text-lg text-amber-400">Tulis Testimoni</h3>
+          <button onclick="closeReviewModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+        </div>
+
+        <form onsubmit="submitReview(event)" class="space-y-3">
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">GrowID / Nama</label>
+            <input type="text" id="review-name" placeholder="Contoh: GrowMaster99" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
+          </div>
+
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">Rating Bintang</label>
+            <select id="review-rating" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-amber-400 text-sm focus:outline-none focus:border-amber-400 font-bold">
+              <option value="5">⭐⭐⭐⭐⭐ (Sangat Puas)</option>
+              <option value="4">⭐⭐⭐⭐ (Puas)</option>
+              <option value="3">⭐⭐⭐ (Cukup)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">Pesan Ulasan</label>
+            <textarea id="review-comment" rows="3" placeholder="Contoh: Proses kilat tidak sampai 2 menit, mantap adminnya!" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400"></textarea>
+          </div>
+
+          <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-2xl transition mt-2 shadow-lg shadow-amber-500/20">
+            Kirim Ulasan
+          </button>
+        </form>
+      </div>
+    </div>
+
     <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-5 right-5 hidden bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-2xl font-medium transition-all duration-300 z-50 border border-emerald-400/30">
       <span id="toast-message">Notifikasi</span>
@@ -248,6 +305,13 @@
     let itemsData = [];
     let activeFilter = 'all';
     let selectedItem = null;
+
+    // Data Awal Testimoni
+    const defaultReviews = [
+      { name: "Rexa_GT", rating: 5, comment: "Proses cepat banget cuma 1 menit DLs langsung masuk World! Recommended seller bgt 🔥", date: "Hari ini" },
+      { name: "VortexBuyer", rating: 5, comment: "Admin ramah dan fast respon biarpun order jam 2 malam. Sukses terus TAASTORE!", date: "Kemarin" },
+      { name: "AzkaPlayer", rating: 5, comment: "Harga terjangkau, transaksi aman 100%. Jangan ragu beli di sini guys.", date: "3 hari lalu" }
+    ];
 
     async function loadItems() {
       try {
@@ -410,6 +474,64 @@
       });
     }
 
+    // Function Logika Testimoni
+    function loadReviews() {
+      const container = document.getElementById("review-list");
+      const stored = localStorage.getItem("taastore_reviews");
+      const reviews = stored ? JSON.parse(stored) : defaultReviews;
+
+      container.innerHTML = "";
+      reviews.forEach(rev => {
+        const stars = "⭐".repeat(rev.rating);
+        const card = document.createElement("div");
+        card.className = "bg-slate-900/60 backdrop-blur-md p-4 rounded-2xl border border-slate-800/80 flex flex-col justify-between";
+        card.innerHTML = `
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-bold text-sm text-slate-200">${rev.name}</span>
+              <span class="text-xs text-amber-400">${stars}</span>
+            </div>
+            <p class="text-xs text-slate-400 italic">"${rev.comment}"</p>
+          </div>
+          <div class="text-[10px] text-slate-600 mt-3 text-right">${rev.date}</div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openReviewModal() {
+      document.getElementById("review-modal").classList.remove("hidden");
+    }
+
+    function closeReviewModal() {
+      document.getElementById("review-modal").classList.add("hidden");
+    }
+
+    function submitReview(e) {
+      e.preventDefault();
+      const name = document.getElementById("review-name").value;
+      const rating = parseInt(document.getElementById("review-rating").value);
+      const comment = document.getElementById("review-comment").value;
+
+      const stored = localStorage.getItem("taastore_reviews");
+      const reviews = stored ? JSON.parse(stored) : defaultReviews;
+
+      reviews.unshift({
+        name,
+        rating,
+        comment,
+        date: "Baru saja"
+      });
+
+      localStorage.setItem("taastore_reviews", JSON.stringify(reviews));
+      loadReviews();
+      closeReviewModal();
+      showToast("Terima kasih atas ulasannya! ✨");
+
+      document.getElementById("review-name").value = "";
+      document.getElementById("review-comment").value = "";
+    }
+
     function openCartModal(id) {
       selectedItem = itemsData.find(i => i.id === id);
       if (!selectedItem) return;
@@ -559,6 +681,7 @@ Mohon diproses min, terima kasih! 🙏`;
 
     // Jalankan pertama kali saat load
     loadItems();
+    loadReviews();
   </script>
 </body>
 </html>
