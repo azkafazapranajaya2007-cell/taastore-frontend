@@ -5,7 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TAASTORE</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes marquee {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .animate-marquee {
+      display: inline-block;
+      white-space: nowrap;
+      animation: marquee 18s linear infinite;
+    }
+     </style>
 </head>
+  
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+
+  <!-- 2. TARUH RUNNING TEXT DI BAGIAN PALING ATAS KONTEN -->
+  <div class="bg-amber-500/10 border-y border-amber-500/20 py-2 overflow-hidden whitespace-nowrap mb-6">
+    <div class="inline-block animate-marquee text-amber-400 font-medium text-sm">
+      🚀 Selamat datang di TAASTORE! Tempat transaksi Gems & Items paling aman, terpercaya, dan proses kilat 24/7! 🚀
+    </div>
+  </div>
+
+  <!-- Konten Web Kamu yang Lain (Header, Banner, Search, Kartu Produk, dll) -->
+  <header>...</header>
+  <main>...</main>
+
+  <!-- Toast Notification & Tombol Feedback CS -->
+  <div id="toast" class="...">...</div>
+  <a href="https://wa.me/6282123602358..." class="...">💬 Kritik & Saran</a>
+
+  <script>
+    // Semua kode JavaScript kamu di sini
+  </script>
+
+<!-- 3. TUTUP TAG BODY DI SINI -->
+</body>
+
 <body class="bg-slate-900 text-white min-h-screen pb-12">
   <div class="container mx-auto px-4 py-8">
     
@@ -190,6 +227,26 @@ function showToast(message, isError = false) {
   }, 3000);
 }
 
+function toggleLike(btn) {
+  const countEl = btn.querySelector('.like-count');
+  let currentLikes = parseInt(countEl.innerText);
+  
+  if (btn.classList.contains('liked')) {
+    btn.classList.remove('liked');
+    btn.classList.remove('text-rose-500');
+    btn.classList.add('text-slate-400');
+    countEl.innerText = currentLikes - 1;
+  } else {
+    btn.classList.add('liked');
+    btn.classList.add('text-rose-500');
+    btn.classList.remove('text-slate-400');
+    countEl.innerText = currentLikes + 1;
+    if (typeof showToast === 'function') {
+      showToast("Terima kasih atas respons positifnya! ❤️");
+    }
+  }
+}
+
     function setFilter(type) {
       activeFilter = type;
       document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -209,35 +266,88 @@ function showToast(message, isError = false) {
       renderProducts(filtered);
     }
 
-    function renderProducts(data) {
-      const container = document.getElementById("product-list");
-      const loading = document.getElementById("loading");
-      loading.classList.add("hidden");
-      container.innerHTML = "";
+function renderProducts(data) {
+  const container = document.getElementById("product-list");
+  const loading = document.getElementById("loading");
+  if (loading) loading.classList.add("hidden");
+  container.innerHTML = "";
 
-      if (data.length === 0) {
-        container.innerHTML = `<div class="col-span-full text-center py-8 text-slate-500">Tidak ada produk ditemukan.</div>`;
-        return;
-      }
+  if (data.length === 0) {
+    container.innerHTML = `<div class="col-span-full text-center py-8 text-slate-500">Tidak ada produk ditemukan.</div>`;
+    return;
+  }
 
-      data.forEach(item => {
-        const card = document.createElement("div");
-        card.className = "bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg flex flex-col justify-between relative overflow-hidden";
+  data.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg flex flex-col justify-between relative overflow-hidden";
 
-        let stockBadge = `<span class="bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 text-[10px] font-bold px-2 py-0.5 rounded">READY</span>`;
-        let isOut = false;
-        
-        if (item.stock_status === 'limited') {
-          stockBadge = `<span class="bg-amber-900/80 text-amber-300 border border-amber-700/50 text-[10px] font-bold px-2 py-0.5 rounded">LIMITED</span>`;
-        } else if (item.stock_status === 'empty') {
-          stockBadge = `<span class="bg-rose-900/80 text-rose-300 border border-rose-700/50 text-[10px] font-bold px-2 py-0.5 rounded">OUT OF STOCK</span>`;
-          isOut = true;
-        }
+    // Handling Status Stok
+    let stockBadge = `<span class="bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 text-[10px] font-bold px-2 py-0.5 rounded">READY</span>`;
+    let isOut = false;
 
-       const defaultImage = 'https://placehold.co/400x250/1e293b/f59e0b?text=TAASTORE';
+    if (item.stock_status === 'limited') {
+      stockBadge = `<span class="bg-amber-900/80 text-amber-300 border border-amber-700/50 text-[10px] font-bold px-2 py-0.5 rounded">LIMITED</span>`;
+    } else if (item.stock_status === 'empty') {
+      stockBadge = `<span class="bg-rose-900/80 text-rose-300 border border-rose-700/50 text-[10px] font-bold px-2 py-0.5 rounded">OUT OF STOCK</span>`;
+      isOut = true;
+    }
 
-// Variable Filter
-let activeFilter = 'all';
+    // Handling Gambar Produk
+    const defaultImage = 'https://placehold.co/400x250/1e293b/f59e0b?text=TAASTORE';
+    const imageUrl = item.image_url || defaultImage;
+
+    // Handling Badge Tipe (Jual/Beli)
+    let typeBadge = item.type === 'JUAL' 
+      ? `<span class="bg-purple-900/80 text-purple-300 border border-purple-700/50 text-[10px] font-bold px-2 py-0.5 rounded">JUAL</span>`
+      : `<span class="bg-blue-900/80 text-blue-300 border border-blue-700/50 text-[10px] font-bold px-2 py-0.5 rounded">BELI</span>`;
+
+    card.innerHTML = `
+      <div>
+        <!-- Gambar Produk -->
+        <div class="w-full h-36 bg-slate-900/80 rounded-lg flex items-center justify-center border border-slate-700/50 mb-4 overflow-hidden">
+          <img src="${imageUrl}" alt="${item.name}" class="w-full h-full object-cover" onerror="this.src='${defaultImage}'" />
+        </div>
+
+        <!-- Judul & Tombol Like -->
+        <div class="flex justify-between items-start mb-2 gap-2">
+          <h3 class="font-bold text-slate-100 text-base leading-tight">${item.name}</h3>
+          
+          <button 
+            onclick="toggleLike(this)" 
+            class="p-1.5 rounded-lg bg-slate-900/60 hover:bg-slate-700 border border-slate-700/50 text-slate-400 transition flex items-center gap-1 text-xs shrink-0"
+            title="Sukai produk"
+          >
+            ❤️ <span class="like-count font-bold text-slate-300">0</span>
+          </button>
+        </div>
+
+        <!-- Badges -->
+        <div class="flex gap-1.5 mb-3">
+          ${stockBadge}
+          ${typeBadge}
+        </div>
+
+        <!-- Harga -->
+        <div class="text-amber-400 font-extrabold text-lg mb-4">
+          Rp ${(item.price || 0).toLocaleString('id-ID')}
+        </div>
+      </div>
+
+      <!-- Tombol WA -->
+      <a 
+        href="${isOut ? '#' : `https://wa.me/6282123602358?text=Halo%20CS%20TAASTORE,%20saya%20ingin%20${item.type === 'JUAL' ? 'menjual' : 'membeli'}%20*${encodeURIComponent(item.name)}*`}" 
+        target="${isOut ? '_self' : '_blank'}" 
+        class="w-full ${isOut ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-400 text-slate-950'} font-bold py-2.5 rounded-lg text-center text-sm transition block"
+      >
+        ${isOut ? 'Stok Habis' : (item.type === 'JUAL' ? 'Jual Sekarang' : 'Beli Sekarang')}
+      </a>
+    `;
+
+    container.appendChild(card);
+  });
+}
+
+// Variable Filter	let activeFilter = 'all';
 
 // Fungsi Filter & Search Utama
 function filterProducts() {
@@ -481,6 +591,14 @@ Mohon diproses min, terima kasih! 🙏`;
 <div id="toast" class="fixed bottom-5 right-5 hidden bg-emerald-600 text-white px-5 py-3 rounded-lg shadow-xl font-medium transition-all duration-300 z-50">
   <span id="toast-message">Notifikasi</span>
 </div>
+<!-- Tombol Kritik & Saran CS (Posisi di Kiri Bawah) -->
+  <a 
+    href="https://wa.me/6282123602358?text=Halo%20CS%20TAASTORE,%20saya%20ingin%20memberikan%20kritik%20dan%20saran:" 
+    target="_blank" 
+    class="fixed bottom-5 left-5 bg-slate-800 border border-slate-700 text-slate-200 hover:text-amber-400 px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 text-xs font-semibold transition hover:scale-105 z-40"
+  >
+    💬 Kritik & Saran
+  </a>
 
 </body>
 </html>
