@@ -3,9 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TAASTORE</title>
+  <title>TAASTORE - Store Resmi Gems & Items</title>
+  
+  <!-- Favicon Logo Client -->
+  <link rel="icon" type="image/jpeg" href="./logo.jpeg">
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #f59e0b;
+    }
+
+    /* Ambient Cyber Grid Background */
+    .bg-grid-pattern {
+      background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 35px 35px;
+    }
+
     @keyframes marquee {
       0% { transform: translateX(100%); }
       100% { transform: translateX(-100%); }
@@ -19,178 +45,200 @@
   </style>
 </head>
 
-<body class="bg-slate-900 text-white min-h-screen pb-12">
+<body class="bg-slate-950 text-white min-h-screen pb-12 relative overflow-x-hidden font-sans bg-grid-pattern">
 
-  <!-- Running Text / Marquee -->
-  <div class="bg-amber-500/10 border-b border-amber-500/20 py-2 overflow-hidden whitespace-nowrap mb-6">
-    <div class="inline-block animate-marquee text-amber-400 font-medium text-sm">
-      🚀 Selamat datang di TAASTORE! Tempat transaksi Gems & Items paling aman, terpercaya, dan proses kilat 24/7! 🚀
-    </div>
-  </div>
+  <!-- Glow Ambient Orbs (Efek Lampu Background) -->
+  <div class="fixed -top-32 -left-32 w-96 h-96 bg-cyan-500/15 rounded-full blur-[120px] pointer-events-none z-0"></div>
+  <div class="fixed -bottom-32 -right-32 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
-  <div class="container mx-auto px-4 py-4">
-    
-    <!-- Header -->
-    <header class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
-      <h1 class="text-3xl font-bold text-amber-400 tracking-wider">TAASTORE</h1>
-      <button id="admin-btn" onclick="toggleAdminPanel()" class="bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 px-3 py-2 rounded border border-slate-700">Admin Login</button>
-    </header>
+  <!-- Main Wrapper -->
+  <div class="relative z-10">
 
-    <!-- Banner Promosi -->
-    <div class="mb-8 p-6 bg-gradient-to-r from-amber-500/20 via-slate-800 to-slate-800 rounded-2xl border border-amber-500/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
-      <div>
-        <span class="bg-amber-500 text-slate-950 font-extrabold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">PROMO SPESIAL</span>
-        <h2 class="text-xl font-bold text-white mt-2">Gems & Items Ready Stock!</h2>
-        <p class="text-slate-400 text-sm">Transaksi cepat, aman, dan terpercaya 24/7 via WhatsApp CS.</p>
-      </div>
-      <div class="text-xs text-amber-400 bg-amber-500/10 px-3 py-2 rounded-lg border border-amber-500/20">
-        ⚡ Garansi Proses Cepat
+    <!-- Running Text / Marquee -->
+    <div class="bg-slate-900/80 backdrop-blur-md border-b border-amber-500/20 py-2 overflow-hidden whitespace-nowrap mb-6">
+      <div class="inline-block animate-marquee text-amber-400 font-medium text-sm">
+        🚀 Selamat datang di TAASTORE! Tempat transaksi Gems & Items paling aman, terpercaya, dan proses kilat 24/7! 🚀
       </div>
     </div>
 
-    <!-- Panel Admin -->
-    <section id="admin-panel" class="hidden mb-10 bg-slate-800 p-6 rounded-xl border border-amber-500/50 shadow-2xl">
-      <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
-        <h2 class="text-lg font-bold text-amber-400">Panel Manajemen Produk (Protected)</h2>
-        <button onclick="logoutAdmin()" class="text-xs bg-rose-900 text-rose-300 px-2.5 py-1 rounded hover:bg-rose-800">Logout Admin</button>
-      </div>
-
-      <form id="item-form" onsubmit="saveItem(event)" class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-        <input type="hidden" id="item-id">
-        <input type="text" id="item-name" placeholder="Nama Produk" required class="bg-slate-900 border border-slate-700 p-2.5 rounded text-sm focus:outline-none focus:border-amber-400">
-        <input type="number" id="item-price" placeholder="Harga (Rp)" required class="bg-slate-900 border border-slate-700 p-2.5 rounded text-sm focus:outline-none focus:border-amber-400">
-        <input type="url" id="item-image" placeholder="Image URL (e.g. https://...)" class="bg-slate-900 border border-slate-700 p-2.5 rounded text-sm focus:outline-none focus:border-amber-400">
-        
-        <select id="item-type" class="bg-slate-900 border border-slate-700 p-2.5 rounded text-sm focus:outline-none focus:border-amber-400">
-          <option value="beli">BELI</option>
-          <option value="jual">JUAL</option>
-        </select>
-        <select id="item-status" class="bg-slate-900 border border-slate-700 p-2.5 rounded text-sm focus:outline-none focus:border-amber-400">
-          <option value="ready">Ready</option>
-          <option value="limited">Limited</option>
-          <option value="empty">Out of Stock</option>
-        </select>
-        
-        <div class="flex gap-2 col-span-1 md:col-span-3">
-          <button type="submit" id="form-btn" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold p-2.5 rounded text-sm">Tambah Produk</button>
-          <button type="button" onclick="resetForm()" class="bg-slate-700 text-slate-300 p-2.5 rounded text-sm">Batal</button>
-        </div>
-      </form>
-    </section>
-
-    <!-- Search & Filter -->
-    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-      <div class="w-full md:w-1/3">
-        <input 
-          type="text" 
-          id="search-input" 
-          oninput="filterProducts()" 
-          placeholder="🔍 Cari nama produk..." 
-          class="w-full bg-slate-800 border border-slate-700 px-4 py-2.5 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition text-sm"
-        />
-      </div>
-
-      <div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-1">
-        <button 
-          onclick="setFilter('all')" 
-          id="filter-all" 
-          class="filter-btn active-filter bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition whitespace-nowrap">
-          Semua
-        </button>
-        <button 
-          onclick="setFilter('beli')" 
-          id="filter-beli" 
-          class="filter-btn bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-2 rounded-lg text-xs transition whitespace-nowrap">
-          Katalog Beli
-        </button>
-        <button 
-          onclick="setFilter('jual')" 
-          id="filter-jual" 
-          class="filter-btn bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-2 rounded-lg text-xs transition whitespace-nowrap">
-          Katalog Jual
-        </button>
-      </div>
-    </div>
-
-    <!-- Main Content -->
-    <main>
-      <div id="loading" class="text-slate-400 py-8 text-center">Memuat data barang...</div>
-      <div id="product-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
-    </main>
-  </div>
-
-  <!-- Modal Checkout Form -->
-  <div id="cart-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-3 mb-4">
-        <h3 class="font-bold text-lg text-amber-400" id="cart-item-name">Detail Pesanan</h3>
-        <button onclick="closeCartModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
-      </div>
+    <div class="container mx-auto px-4 py-2">
       
-      <form onsubmit="sendToWA(event)" class="space-y-3">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs text-slate-400 mb-1 block">Harga Satuan</label>
-            <div class="text-base font-bold text-white" id="cart-item-price">Rp 0</div>
+      <!-- Header -->
+      <header class="flex justify-between items-center mb-6 border-b border-slate-800/80 pb-4 backdrop-blur-sm bg-slate-900/30 p-4 rounded-2xl border border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="relative group">
+            <div class="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 to-amber-500 rounded-xl blur opacity-50 group-hover:opacity-75 transition duration-200"></div>
+            <img src="./logo.jpeg" alt="TAASTORE Logo" class="relative w-10 h-10 rounded-xl object-cover border border-slate-700">
           </div>
           <div>
-            <label class="text-xs text-slate-400 mb-1 block">Jumlah / Qty</label>
-            <input type="number" id="cart-qty" min="1" value="1" oninput="calculateTotal()" required class="w-full bg-slate-900 border border-slate-700 p-2 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400">
-          </div>
-        </div>
-
-        <div>
-          <label class="text-xs text-slate-400 mb-1 block">Nama Pembeli</label>
-          <input type="text" id="buyer-name" placeholder="Masukkan nama kamu" required class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400">
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="text-xs text-slate-400 mb-1 block">GrowID / ID Game</label>
-            <input type="text" id="buyer-game-id" placeholder="Contoh: Azka07" required class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400">
-          </div>
-          <div>
-            <label class="text-xs text-slate-400 mb-1 block">World Name</label>
-            <input type="text" id="buyer-world" placeholder="Contoh: TAASTORE" required class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400">
+            <h1 class="text-2xl md:text-3xl font-black text-amber-400 tracking-wider">TAASTORE</h1>
+            <p class="text-[10px] text-cyan-400 font-semibold tracking-widest uppercase">Gems & Items Marketplace</p>
           </div>
         </div>
+        <button id="admin-btn" onclick="toggleAdminPanel()" class="bg-slate-800/80 hover:bg-slate-700 text-xs text-slate-300 px-3 py-2 rounded-lg border border-slate-700/80 transition">Admin Login</button>
+      </header>
 
-        <div>
-          <label class="text-xs text-slate-400 mb-1 block">Metode Pembayaran</label>
-          <select id="buyer-payment" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400">
-            <option value="QRIS">QRIS All Payment</option>
-            <option value="BCA">Bank BCA</option>
-            <option value="DANA">DANA</option>
-            <option value="GOPAY">GoPay</option>
-            <option value="Seabank">Seabank</option>
+      <!-- Banner Promosi -->
+      <div class="mb-8 p-6 bg-gradient-to-r from-cyan-950/40 via-slate-900/90 to-amber-950/30 rounded-2xl border border-cyan-500/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-2xl backdrop-blur-md relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-2xl"></div>
+        <div class="relative z-10">
+          <span class="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black text-[10px] px-3 py-1 rounded-full uppercase tracking-wider shadow-lg">PROMO SPESIAL</span>
+          <h2 class="text-xl md:text-2xl font-black text-white mt-2 tracking-wide">Gems & Items Ready Stock!</h2>
+          <p class="text-slate-400 text-sm mt-0.5">Transaksi cepat, aman, dan terpercaya 24/7 via WhatsApp CS.</p>
+        </div>
+        <div class="relative z-10 text-xs text-amber-400 bg-amber-500/10 px-3.5 py-2 rounded-xl border border-amber-500/30 font-medium">
+          ⚡ Garansi Proses Cepat
+        </div>
+      </div>
+
+      <!-- Panel Admin -->
+      <section id="admin-panel" class="hidden mb-10 bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border border-amber-500/50 shadow-2xl">
+        <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+          <h2 class="text-lg font-bold text-amber-400">Panel Manajemen Produk (Protected)</h2>
+          <button onclick="logoutAdmin()" class="text-xs bg-rose-900/80 text-rose-300 px-3 py-1.5 rounded-lg border border-rose-700/50 hover:bg-rose-800">Logout Admin</button>
+        </div>
+
+        <form id="item-form" onsubmit="saveItem(event)" class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+          <input type="hidden" id="item-id">
+          <input type="text" id="item-name" placeholder="Nama Produk" required class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-sm focus:outline-none focus:border-amber-400">
+          <input type="number" id="item-price" placeholder="Harga (Rp)" required class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-sm focus:outline-none focus:border-amber-400">
+          <input type="url" id="item-image" placeholder="Image URL (e.g. https://...)" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-sm focus:outline-none focus:border-amber-400">
+          
+          <select id="item-type" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-sm focus:outline-none focus:border-amber-400">
+            <option value="beli">BELI</option>
+            <option value="jual">JUAL</option>
           </select>
+          <select id="item-status" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-sm focus:outline-none focus:border-amber-400">
+            <option value="ready">Ready</option>
+            <option value="limited">Limited</option>
+            <option value="empty">Out of Stock</option>
+          </select>
+          
+          <div class="flex gap-2 col-span-1 md:col-span-3">
+            <button type="submit" id="form-btn" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold p-2.5 rounded-xl text-sm shadow-lg shadow-amber-500/20">Tambah Produk</button>
+            <button type="button" onclick="resetForm()" class="bg-slate-800 text-slate-300 p-2.5 rounded-xl text-sm border border-slate-700">Batal</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Search & Filter -->
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+        <div class="w-full md:w-1/3">
+          <input 
+            type="text" 
+            id="search-input" 
+            oninput="filterProducts()" 
+            placeholder="🔍 Cari nama produk..." 
+            class="w-full bg-slate-900/80 backdrop-blur-md border border-slate-800 px-4 py-2.5 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition text-sm shadow-inner"
+          />
         </div>
 
-        <div class="bg-slate-900 p-3.5 rounded-xl border border-slate-700/50 mt-2">
-          <div class="text-xs text-slate-400 mb-0.5">Total Pembayaran:</div>
-          <div class="text-2xl font-black text-amber-400" id="cart-total-price">Rp 0</div>
+        <div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-1">
+          <button 
+            onclick="setFilter('all')" 
+            id="filter-all" 
+            class="filter-btn active-filter bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition whitespace-nowrap shadow-lg shadow-amber-500/20">
+            Semua
+          </button>
+          <button 
+            onclick="setFilter('beli')" 
+            id="filter-beli" 
+            class="filter-btn bg-slate-900/80 backdrop-blur-md border border-slate-800 text-slate-300 hover:bg-slate-800 px-4 py-2 rounded-xl text-xs transition whitespace-nowrap">
+            Katalog Beli
+          </button>
+          <button 
+            onclick="setFilter('jual')" 
+            id="filter-jual" 
+            class="filter-btn bg-slate-900/80 backdrop-blur-md border border-slate-800 text-slate-300 hover:bg-slate-800 px-4 py-2 rounded-xl text-xs transition whitespace-nowrap">
+            Katalog Jual
+          </button>
         </div>
+      </div>
 
-        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-xl transition mt-2">
-          Kirim Pesanan ke WhatsApp CS
-        </button>
-      </form>
+      <!-- Main Content -->
+      <main>
+        <div id="loading" class="text-slate-400 py-8 text-center">Memuat data barang...</div>
+        <div id="product-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+      </main>
     </div>
-  </div>
 
-  <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-5 right-5 hidden bg-emerald-600 text-white px-5 py-3 rounded-lg shadow-xl font-medium transition-all duration-300 z-50">
-    <span id="toast-message">Notifikasi</span>
-  </div>
+    <!-- Modal Checkout Form -->
+    <div id="cart-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative overflow-hidden">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+          <div class="flex items-center gap-2">
+            <img src="./logo.jpeg" alt="Logo" class="w-6 h-6 rounded-md">
+            <h3 class="font-bold text-lg text-amber-400" id="cart-item-name">Detail Pesanan</h3>
+          </div>
+          <button onclick="closeCartModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+        </div>
+        
+        <form onsubmit="sendToWA(event)" class="space-y-3">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">Harga Satuan</label>
+              <div class="text-base font-bold text-white" id="cart-item-price">Rp 0</div>
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">Jumlah / Qty</label>
+              <input type="number" id="cart-qty" min="1" value="1" oninput="calculateTotal()" required class="w-full bg-slate-950 border border-slate-800 p-2 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
+            </div>
+          </div>
 
-  <!-- Tombol Kritik & Saran CS -->
-  <a 
-    href="https://wa.me/6282123602358?text=Halo%20CS%20TAASTORE,%20saya%20ingin%20memberikan%20kritik%20dan%20saran:" 
-    target="_blank" 
-    class="fixed bottom-5 left-5 bg-slate-800 border border-slate-700 text-slate-200 hover:text-amber-400 px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 text-xs font-semibold transition hover:scale-105 z-40"
-  >
-    💬 Kritik & Saran
-  </a>
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">Nama Pembeli</label>
+            <input type="text" id="buyer-name" placeholder="Masukkan nama kamu" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">GrowID / ID Game</label>
+              <input type="text" id="buyer-game-id" placeholder="Contoh: Azka07" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">World Name</label>
+              <input type="text" id="buyer-world" placeholder="Contoh: TAASTORE" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">Metode Pembayaran</label>
+            <select id="buyer-payment" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
+              <option value="QRIS">QRIS All Payment</option>
+              <option value="BCA">Bank BCA</option>
+              <option value="DANA">DANA</option>
+              <option value="GOPAY">GoPay</option>
+              <option value="Seabank">Seabank</option>
+            </select>
+          </div>
+
+          <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 mt-2">
+            <div class="text-xs text-slate-400 mb-0.5">Total Pembayaran:</div>
+            <div class="text-2xl font-black text-amber-400" id="cart-total-price">Rp 0</div>
+          </div>
+
+          <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-2xl transition mt-2 shadow-lg shadow-amber-500/20">
+            Kirim Pesanan ke WhatsApp CS
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 hidden bg-emerald-600 text-white px-5 py-3 rounded-xl shadow-2xl font-medium transition-all duration-300 z-50 border border-emerald-400/30">
+      <span id="toast-message">Notifikasi</span>
+    </div>
+
+    <!-- Tombol Kritik & Saran CS -->
+    <a 
+      href="https://wa.me/6282123602358?text=Halo%20CS%20TAASTORE,%20saya%20ingin%20memberikan%20kritik%20dan%20saran:" 
+      target="_blank" 
+      class="fixed bottom-5 left-5 bg-slate-900/90 backdrop-blur-md border border-slate-800 text-slate-200 hover:text-amber-400 px-4 py-2.5 rounded-full shadow-2xl flex items-center gap-2 text-xs font-semibold transition hover:scale-105 z-40"
+    >
+      💬 Kritik & Saran
+    </a>
+
+  </div>
 
   <!-- JavaScript Logika Utama -->
   <script>
@@ -220,7 +268,7 @@
       const toastMessage = document.getElementById("toast-message");
       
       toastMessage.innerText = message;
-      toast.className = `fixed bottom-5 right-5 block ${isError ? 'bg-rose-600' : 'bg-emerald-600'} text-white px-5 py-3 rounded-lg shadow-xl font-medium transition-all duration-300 z-50`;
+      toast.className = `fixed bottom-5 right-5 block ${isError ? 'bg-rose-600 border-rose-400/30' : 'bg-emerald-600 border-emerald-400/30'} text-white px-5 py-3 rounded-xl shadow-2xl font-medium transition-all duration-300 z-50 border`;
       
       setTimeout(() => {
         toast.className = toast.className.replace("block", "hidden");
@@ -252,8 +300,8 @@
       const btnBeli = document.getElementById('filter-beli');
       const btnJual = document.getElementById('filter-jual');
 
-      const activeClass = "filter-btn active-filter bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-lg text-xs transition whitespace-nowrap";
-      const inactiveClass = "filter-btn bg-slate-800 text-slate-300 hover:bg-slate-700 px-4 py-2 rounded-lg text-xs transition whitespace-nowrap";
+      const activeClass = "filter-btn active-filter bg-amber-500 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs transition whitespace-nowrap shadow-lg shadow-amber-500/20";
+      const inactiveClass = "filter-btn bg-slate-900/80 backdrop-blur-md border border-slate-800 text-slate-300 hover:bg-slate-800 px-4 py-2 rounded-xl text-xs transition whitespace-nowrap";
 
       if (btnAll) btnAll.className = type === 'all' ? activeClass : inactiveClass;
       if (btnBeli) btnBeli.className = type === 'beli' ? activeClass : inactiveClass;
@@ -289,33 +337,33 @@
 
       data.forEach(item => {
         const card = document.createElement("div");
-        card.className = "bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg flex flex-col justify-between relative overflow-hidden";
+        card.className = "bg-slate-900/80 backdrop-blur-md p-5 rounded-2xl border border-slate-800/80 shadow-xl flex flex-col justify-between relative overflow-hidden group hover:border-amber-500/30 transition duration-300";
 
         // Stok Badges
-        let stockBadge = `<span class="bg-emerald-900/80 text-emerald-300 border border-emerald-700/50 text-[10px] font-bold px-2 py-0.5 rounded">READY</span>`;
+        let stockBadge = `<span class="bg-emerald-950/80 text-emerald-400 border border-emerald-800/50 text-[10px] font-bold px-2 py-0.5 rounded-md">READY</span>`;
         let isOut = false;
 
         if (item.stock_status === 'limited') {
-          stockBadge = `<span class="bg-amber-900/80 text-amber-300 border border-amber-700/50 text-[10px] font-bold px-2 py-0.5 rounded">LIMITED</span>`;
+          stockBadge = `<span class="bg-amber-950/80 text-amber-400 border border-amber-800/50 text-[10px] font-bold px-2 py-0.5 rounded-md">LIMITED</span>`;
         } else if (item.stock_status === 'empty') {
-          stockBadge = `<span class="bg-rose-900/80 text-rose-300 border border-rose-700/50 text-[10px] font-bold px-2 py-0.5 rounded">OUT OF STOCK</span>`;
+          stockBadge = `<span class="bg-rose-950/80 text-rose-400 border border-rose-800/50 text-[10px] font-bold px-2 py-0.5 rounded-md">OUT OF STOCK</span>`;
           isOut = true;
         }
 
         // Gambar
-        const defaultImage = 'https://placehold.co/400x250/1e293b/f59e0b?text=TAASTORE';
+        const defaultImage = 'https://placehold.co/400x250/0f172a/f59e0b?text=TAASTORE';
         const imageUrl = item.image_url && item.image_url.trim() !== '' ? item.image_url : defaultImage;
 
         // Badge Tipe
         const itemType = (item.type || 'BELI').toUpperCase();
         let typeBadge = itemType === 'JUAL' 
-          ? `<span class="bg-purple-900/80 text-purple-300 border border-purple-700/50 text-[10px] font-bold px-2 py-0.5 rounded">JUAL</span>`
-          : `<span class="bg-blue-900/80 text-blue-300 border border-blue-700/50 text-[10px] font-bold px-2 py-0.5 rounded">BELI</span>`;
+          ? `<span class="bg-purple-950/80 text-purple-300 border border-purple-800/50 text-[10px] font-bold px-2 py-0.5 rounded-md">JUAL</span>`
+          : `<span class="bg-blue-950/80 text-cyan-300 border border-cyan-800/50 text-[10px] font-bold px-2 py-0.5 rounded-md">BELI</span>`;
 
         card.innerHTML = `
           <div>
-            <div class="w-full h-36 bg-slate-900/80 rounded-lg flex items-center justify-center border border-slate-700/50 mb-4 overflow-hidden">
-              <img src="${imageUrl}" alt="${item.name}" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='${defaultImage}'" />
+            <div class="w-full h-36 bg-slate-950/80 rounded-xl flex items-center justify-center border border-slate-800 mb-4 overflow-hidden group-hover:border-slate-700 transition">
+              <img src="${imageUrl}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.src='${defaultImage}'" />
             </div>
 
             <div class="flex justify-between items-start mb-2 gap-2">
@@ -323,7 +371,7 @@
               
               <button 
                 onclick="toggleLike(this)" 
-                class="p-1.5 rounded-lg bg-slate-900/60 hover:bg-slate-700 border border-slate-700/50 text-slate-400 transition flex items-center gap-1 text-xs shrink-0"
+                class="p-1.5 rounded-lg bg-slate-950/60 hover:bg-slate-800 border border-slate-800 text-slate-400 transition flex items-center gap-1 text-xs shrink-0"
                 title="Sukai produk"
               >
                 ❤️ <span class="like-count font-bold text-slate-300">0</span>
@@ -335,7 +383,7 @@
               ${typeBadge}
             </div>
 
-            <div class="text-amber-400 font-extrabold text-lg mb-4">
+            <div class="text-amber-400 font-black text-xl mb-4">
               Rp ${(item.price || 0).toLocaleString('id-ID')}
             </div>
           </div>
@@ -344,15 +392,15 @@
             <button 
               onclick="openCartModal(${item.id})" 
               ${isOut ? 'disabled' : ''} 
-              class="w-full text-center ${isOut ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-600 text-slate-950'} font-bold py-2.5 px-4 rounded-lg transition duration-200"
+              class="w-full text-center ${isOut ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50' : 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-lg shadow-amber-500/10'} font-bold py-2.5 px-4 rounded-xl transition duration-200"
             >
               ${isOut ? 'Stok Habis' : 'Beli Sekarang'}
             </button>
 
             ${isAdmin ? `
-              <div class="flex gap-2 mt-3 pt-3 border-t border-slate-700">
-                <button onclick="editItem(${item.id})" class="flex-1 bg-blue-600 hover:bg-blue-500 text-xs py-1.5 rounded font-medium">Edit</button>
-                <button onclick="deleteItem(${item.id})" class="flex-1 bg-rose-600 hover:bg-rose-500 text-xs py-1.5 rounded font-medium">Hapus</button>
+              <div class="flex gap-2 mt-3 pt-3 border-t border-slate-800">
+                <button onclick="editItem(${item.id})" class="flex-1 bg-blue-600/80 hover:bg-blue-600 text-xs py-1.5 rounded-lg font-medium border border-blue-500/30">Edit</button>
+                <button onclick="deleteItem(${item.id})" class="flex-1 bg-rose-600/80 hover:bg-rose-600 text-xs py-1.5 rounded-lg font-medium border border-rose-500/30">Hapus</button>
               </div>
             ` : ''}
           </div>
@@ -423,7 +471,7 @@ Mohon diproses min, terima kasih! 🙏`;
           adminKey = inputPassword;
           document.getElementById("admin-panel").classList.remove("hidden");
           document.getElementById("admin-btn").innerText = "Admin Active";
-          document.getElementById("admin-btn").className = "bg-emerald-800 text-emerald-200 text-xs px-3 py-2 rounded border border-emerald-600 font-bold";
+          document.getElementById("admin-btn").className = "bg-emerald-900/80 text-emerald-300 text-xs px-3 py-2 rounded-lg border border-emerald-600/50 font-bold";
           filterProducts();
         } else if (inputPassword) {
           alert("Password Salah!");
@@ -436,7 +484,7 @@ Mohon diproses min, terima kasih! 🙏`;
       adminKey = "";
       document.getElementById("admin-panel").classList.add("hidden");
       document.getElementById("admin-btn").innerText = "Admin Login";
-      document.getElementById("admin-btn").className = "bg-slate-800 hover:bg-slate-700 text-xs text-slate-400 px-3 py-2 rounded border border-slate-700";
+      document.getElementById("admin-btn").className = "bg-slate-800/80 hover:bg-slate-700 text-xs text-slate-300 px-3 py-2 rounded-lg border border-slate-700/80 transition";
       resetForm();
       filterProducts();
     }
