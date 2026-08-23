@@ -183,11 +183,7 @@
       <section class="mt-14 mb-8">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-slate-800 pb-4">
           <div>
-            <div class="flex items-center gap-2">
-              <span class="text-amber-400 font-bold text-sm">⭐ 4.9 / 5.0</span>
-              <span class="text-xs text-slate-500">• (100+ Transaksi Sukses)</span>
-            </div>
-            <h2 class="text-2xl font-black text-white tracking-wide mt-1">Ulasan Pelanggan</h2>
+            <h2 class="text-2xl font-black text-white tracking-wide">Ulasan Pelanggan</h2>
             <p class="text-slate-400 text-xs mt-0.5">Pengalaman langsung dari pembeli di TAASTORE</p>
           </div>
           <button onclick="openReviewModal()" class="bg-slate-900 hover:bg-slate-800 border border-amber-500/30 text-amber-400 font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-2 shadow-lg">
@@ -312,11 +308,8 @@
     let activeFilter = 'all';
     let selectedItem = null;
 
-    const defaultReviews = [
-      { name: "Rexa_GT", rating: 5, comment: "Proses cepat banget cuma 1 menit DLs langsung masuk World! Recommended seller bgt 🔥", date: "Hari ini" },
-      { name: "VortexBuyer", rating: 5, comment: "Admin ramah dan fast respon biarpun order jam 2 malam. Sukses terus TAASTORE!", date: "Kemarin" },
-      { name: "AzkaPlayer", rating: 5, comment: "Harga terjangkau, transaksi aman 100%. Jangan ragu beli di sini guys.", date: "3 hari lalu" }
-    ];
+    // Kosongkan array defaultReviews agar tidak ada ulasan buatan/dummy
+    const defaultReviews = [];
 
     async function loadItems() {
       try {
@@ -465,7 +458,22 @@
       const container = document.getElementById("review-list");
       const stored = localStorage.getItem("taastore_reviews");
       const reviews = stored ? JSON.parse(stored) : defaultReviews;
+      
       container.innerHTML = "";
+
+      // Tampilan jika belum ada ulasan sama sekali (Integritas/Jujur)
+      if (reviews.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-10 bg-slate-900/40 rounded-2xl border border-slate-800/60 backdrop-blur-md">
+            <div class="text-3xl mb-2">💬</div>
+            <p class="text-slate-300 font-semibold text-sm">Belum Ada Ulasan Pelanggan</p>
+            <p class="text-slate-500 text-xs mt-1">Jadilah pembeli pertama di TAASTORE dan bagikan pengalaman transaksimu di sini!</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Render ulasan organik jika sudah ada pelanggan yang mengisi form
       reviews.forEach(rev => {
         const stars = "⭐".repeat(rev.rating);
         const card = document.createElement("div");
@@ -498,7 +506,7 @@
       const rating = parseInt(document.getElementById("review-rating").value);
       const comment = document.getElementById("review-comment").value;
       const stored = localStorage.getItem("taastore_reviews");
-      const reviews = stored ? JSON.parse(stored) : defaultReviews;
+      const reviews = stored ? JSON.parse(stored) : [];
       reviews.unshift({
         name,
         rating,
