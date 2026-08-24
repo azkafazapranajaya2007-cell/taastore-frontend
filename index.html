@@ -47,41 +47,58 @@
       animation: marquee-seamless 25s linear infinite;
     }
 
-/* Styling & Animasi Bintang Jatuh */
+/* Styling Bintang Jatuh Versi Estetik */
 .star {
   position: fixed;
-  top: -50px;
-  width: 2px;
-  height: 80px;
-  background: linear-gradient(180deg, rgba(245, 158, 11, 0), #f59e0b, #ffffff);
-  border-radius: 50%;
-  filter: drop-shadow(0 0 6px #f59e0b);
+  top: -100px;
+  width: 3px;
+  height: 90px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(245, 158, 11, 0.5), #ffffff);
+  border-radius: 999px;
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.8));
   animation: meteor 4s linear infinite;
-  pointer-events-none;
+  pointer-events: none;
   z-index: 1;
+  opacity: 0;
+}
+
+/* Kepala Bintang Bersinar */
+.star::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px 2px #f59e0b, 0 0 18px 4px #ffffff;
 }
 
 @keyframes meteor {
   0% {
-    transform: translateY(0) translateX(0) rotate(-45deg);
+    transform: translateY(0) translateX(0) rotate(-35deg);
+    opacity: 0;
+  }
+  15% {
     opacity: 1;
   }
-  70% {
+  60% {
     opacity: 1;
   }
   100% {
-    transform: translateY(100vh) translateX(-50vw) rotate(-45deg);
+    transform: translateY(105vh) translateX(-45vw) rotate(-35deg);
     opacity: 0;
   }
 }
 
-/* Variasi posisi & jeda waktu agar jatuhnya alami */
-.star:nth-child(1) { left: 30%; animation-delay: 0s; animation-duration: 3.5s; }
-.star:nth-child(2) { left: 60%; animation-delay: 1.2s; animation-duration: 4.5s; }
-.star:nth-child(3) { left: 85%; animation-delay: 2.5s; animation-duration: 3s; }
-.star:nth-child(4) { left: 45%; animation-delay: 3.8s; animation-duration: 5s; }
-.star:nth-child(5) { left: 95%; animation-delay: 5s; animation-duration: 4s; }
-
+/* Variasi posisi, kecepatan & delay biar natural */
+.star:nth-child(1) { left: 40%; animation-delay: 0s; animation-duration: 3.2s; }
+.star:nth-child(2) { left: 70%; animation-delay: 1.5s; animation-duration: 4.2s; }
+.star:nth-child(3) { left: 90%; animation-delay: 2.8s; animation-duration: 2.8s; }
+.star:nth-child(4) { left: 55%; animation-delay: 4.1s; animation-duration: 4.8s; }
+.star:nth-child(5) { left: 100%; animation-delay: 5.5s; animation-duration: 3.5s; }
     .animate-marquee-seamless:hover {
       animation-play-state: paused;="fixed inset-0 pointer-events-none z-0 overflow-hidden">
   <div class="star"></div>
