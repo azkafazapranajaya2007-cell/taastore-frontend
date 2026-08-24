@@ -412,9 +412,9 @@
 
         card.innerHTML = `
           <div>
-            <div class="w-full h-36 bg-slate-950/80 rounded-xl flex items-center justify-center border border-slate-800 mb-4 overflow-hidden group-hover:border-slate-700 transition">
-              <img src="${imageUrl}" alt="${item.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.src='${defaultImage}'" />
-            </div>
+<div class="w-full h-44 bg-slate-950/80 rounded-xl flex items-center justify-center border border-slate-800 mb-4 overflow-hidden group-hover:border-slate-700 transition p-4">
+  <img src="${imageUrl}" alt="${item.name}" class="max-h-full max-w-full object-contain group-hover:scale-110 transition duration-300 [image-rendering:pixelated]" onerror="this.onerror=null; this.src='${defaultImage}'" />
+</div>
             <div class="flex justify-between items-start mb-2 gap-2">
               <h3 class="font-bold text-slate-100 text-base leading-tight">${item.name}</h3>
               
