@@ -47,8 +47,49 @@
       animation: marquee-seamless 25s linear infinite;
     }
 
+/* Styling & Animasi Bintang Jatuh */
+.star {
+  position: fixed;
+  top: -50px;
+  width: 2px;
+  height: 80px;
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0), #f59e0b, #ffffff);
+  border-radius: 50%;
+  filter: drop-shadow(0 0 6px #f59e0b);
+  animation: meteor 4s linear infinite;
+  pointer-events-none;
+  z-index: 1;
+}
+
+@keyframes meteor {
+  0% {
+    transform: translateY(0) translateX(0) rotate(-45deg);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) translateX(-50vw) rotate(-45deg);
+    opacity: 0;
+  }
+}
+
+/* Variasi posisi & jeda waktu agar jatuhnya alami */
+.star:nth-child(1) { left: 30%; animation-delay: 0s; animation-duration: 3.5s; }
+.star:nth-child(2) { left: 60%; animation-delay: 1.2s; animation-duration: 4.5s; }
+.star:nth-child(3) { left: 85%; animation-delay: 2.5s; animation-duration: 3s; }
+.star:nth-child(4) { left: 45%; animation-delay: 3.8s; animation-duration: 5s; }
+.star:nth-child(5) { left: 95%; animation-delay: 5s; animation-duration: 4s; }
+
     .animate-marquee-seamless:hover {
-      animation-play-state: paused;
+      animation-play-state: paused;="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+  <div class="star"></div>
+  <div class="star"></div>
+  <div class="star"></div>
+  <div class="star"></div>
+  <div class="star"></div>
+</div>
     }
   </style>
 </head>
@@ -56,6 +97,15 @@
   <!-- Glow Ambient Orbs -->
   <div class="fixed -top-32 -left-32 w-96 h-96 bg-cyan-500/15 rounded-full blur-[120px] pointer-events-none z-0"></div>
   <div class="fixed -bottom-32 -right-32 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+
+<!-- Overlay Bintang Jatuh -->
+<div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+  <div class="star"></div>
+  <div class="star"></div>
+  <div class="star"></div>
+  <div class="star"></div>
+  <div class="star"></div>
+</div>
   
   <!-- Main Wrapper -->
   <div class="relative z-10">
