@@ -651,7 +651,7 @@ Mohon diproses min, terima kasih! 🙏`;
     loadReviews();
   </script>
 
-  <!-- Script Animasi Canvas Bintang Jatuh Endless (Silver-White) -->
+<!-- Script Animasi Canvas Bintang Jatuh Endless (Multi-Color Cyber Palette) -->
   <script>
     (function () {
       const canvas = document.getElementById('starCanvas');
@@ -665,17 +665,27 @@ Mohon diproses min, terima kasih! 🙏`;
         height = canvas.height = window.innerHeight;
       });
 
-      const starCount = 18;
+      // Palet warna bintang jatuh (Cyan, Amber, Magenta, Silver)
+      const colorPalette = [
+        { head: 'rgba(245, 158, 11, ', body: 'rgba(251, 191, 36, ', glow: '#f59e0b' }, // Amber / Emas
+        { head: 'rgba(6, 182, 212, ',  body: 'rgba(34, 211, 238, ', glow: '#06b6d4' }, // Cyan / Biru Neon
+        { head: 'rgba(236, 72, 153, ', body: 'rgba(244, 114, 182, ', glow: '#ec4899' }, // Magenta / Pink Neon
+        { head: 'rgba(255, 255, 255, ', body: 'rgba(226, 232, 240, ', glow: '#ffffff' }  // Silver / White
+      ];
+
+      const starCount = 20;
       const stars = [];
 
       function createStar() {
+        const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
         return {
           x: Math.random() * (width + height) - height,
           y: Math.random() * -height,
-          length: Math.random() * 80 + 40,
+          length: Math.random() * 90 + 45,
           speed: Math.random() * 4 + 2,
-          size: Math.random() * 1.2 + 0.6,
-          opacity: Math.random() * 0.7 + 0.3
+          size: Math.random() * 1.3 + 0.6,
+          opacity: Math.random() * 0.75 + 0.35,
+          color: color
         };
       }
 
@@ -683,7 +693,7 @@ Mohon diproses min, terima kasih! 🙏`;
         stars.push(createStar());
       }
 
-      const angle = Math.PI / 4; // 45 derajat (Kiri Atas ke Kanan Bawah)
+      const angle = Math.PI / 4; // Sudut kemiringan 45 derajat
       const cosA = Math.cos(angle);
       const sinA = Math.sin(angle);
 
@@ -697,11 +707,13 @@ Mohon diproses min, terima kasih! 🙏`;
           const tailX = star.x - star.length * cosA;
           const tailY = star.y - star.length * sinA;
 
+          // Gradasi warna ekor mengikuti palet warna masing-masing bintang
           const gradient = ctx.createLinearGradient(star.x, star.y, tailX, tailY);
-          gradient.addColorStop(0, `rgba(255, 255, 255, ${star.opacity})`);
-          gradient.addColorStop(0.3, `rgba(226, 232, 240, ${star.opacity * 0.5})`);
-          gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          gradient.addColorStop(0, `${star.color.head}${star.opacity})`);
+          gradient.addColorStop(0.35, `${star.color.body}${star.opacity * 0.45})`);
+          gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
+          // Menggambar ekor bintang
           ctx.beginPath();
           ctx.moveTo(star.x, star.y);
           ctx.lineTo(tailX, tailY);
@@ -710,14 +722,16 @@ Mohon diproses min, terima kasih! 🙏`;
           ctx.lineCap = 'round';
           ctx.stroke();
 
+          // Menggambar kepala bintang yang bersinar (Glow effect)
           ctx.beginPath();
           ctx.arc(star.x, star.y, star.size * 1.2, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
-          ctx.shadowBlur = 8;
-          ctx.shadowColor = '#ffffff';
+          ctx.fillStyle = `${star.color.head}${star.opacity})`;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = star.color.glow;
           ctx.fill();
           ctx.shadowBlur = 0;
 
+          // Reset posisi saat keluar dari layar (Looping Endless)
           if (star.y > height + 100 || star.x > width + 100) {
             Object.assign(star, createStar());
           }
