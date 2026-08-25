@@ -9,6 +9,9 @@
   <link rel="icon" type="image/jpeg" href="./logo.jpeg">
   
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Library Vanilla-Tilt untuk Fitur 2 (3D Card Effect) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+
   <style>
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
@@ -47,13 +50,55 @@
     .animate-marquee-seamless:hover {
       animation-play-state: paused;
     }
+
+    /* FITUR 4: CSS Animasi Gradient Border & Pop-Up Scale-Up untuk Modal Checkout */
+    @keyframes spin-border {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .animated-border {
+      position: relative;
+      overflow: hidden;
+    }
+    .animated-border::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(transparent, #f59e0b, transparent 30%, #06b6d4, transparent 70%);
+      animation: spin-border 6s linear infinite;
+      z-index: 0;
+    }
+    .animated-border-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* FITUR 4: Pop-up Scale-up Modal Animation */
+    .modal-scale-up {
+      animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes scaleUp {
+      0% {
+        opacity: 0;
+        transform: scale(0.85);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-white min-h-screen pb-12 relative overflow-x-hidden font-sans bg-grid-pattern">
   
+  <!-- FITUR 1: Canvas Glow & Particle Trail Kursor -->
+  <canvas id="cursorCanvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
   <!-- Background Canvas Bintang Jatuh Endless -->
   <canvas id="starCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
-
   <!-- Glow Ambient Orbs -->
   <div class="fixed -top-32 -left-32 w-96 h-96 bg-cyan-500/15 rounded-full blur-[120px] pointer-events-none z-0"></div>
   <div class="fixed -bottom-32 -right-32 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
@@ -81,7 +126,6 @@
     </div>
     
     <div class="container mx-auto px-4 py-2">
-
 <!-- Header -->
       <header class="flex flex-wrap justify-between items-center gap-4 mb-6 border-b border-slate-800/80 pb-4 backdrop-blur-sm bg-slate-900/30 p-4 rounded-2xl border border-slate-800">
         <div class="flex items-center gap-3">
@@ -94,7 +138,6 @@
             <p class="text-[10px] text-cyan-400 font-semibold tracking-widest uppercase">Gems & Items Marketplace</p>
           </div>
         </div>
-
         <!-- Tombol Media Sosial -->
         <div class="flex items-center gap-2 md:gap-3">
           <!-- Saluran WhatsApp -->
@@ -106,7 +149,6 @@
             <i class="fa-brands fa-whatsapp text-sm"></i>
             <span class="hidden sm:inline">Saluran WA</span>
           </a>
-
           <!-- Instagram -->
           <a href="https://www.instagram.com/taastore.gt?igsh=YnE0MzV2anpxNTNo" 
              target="_blank" 
@@ -116,14 +158,12 @@
             <i class="fa-brands fa-instagram text-sm"></i>
             <span class="hidden sm:inline">Instagram</span>
           </a>
-
           <!-- Admin Button -->
           <button id="admin-btn" onclick="toggleAdminPanel()" class="bg-slate-800/80 hover:bg-slate-700 text-xs text-slate-300 px-3 py-2 rounded-lg border border-slate-700/80 transition">
             Admin Login
           </button>
         </div>
       </header>
-
       <!-- Banner Promosi -->
       <div class="mb-8 p-6 bg-gradient-to-r from-cyan-950/40 via-slate-900/90 to-amber-950/30 rounded-2xl border border-cyan-500/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-2xl backdrop-blur-md relative overflow-hidden">
         <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-2xl"></div>
@@ -136,7 +176,6 @@
           ⚡ Garansi Proses Cepat
         </div>
       </div>
-
       <!-- Panel Admin -->
       <section id="admin-panel" class="hidden mb-10 bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border border-amber-500/50 shadow-2xl">
         <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
@@ -165,7 +204,6 @@
           </div>
         </form>
       </section>
-
       <!-- Search & Filter -->
       <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <div class="w-full md:w-1/3">
@@ -198,13 +236,11 @@
           </button>
         </div>
       </div>
-
       <!-- Main Content -->
       <main class="mb-12">
         <div id="loading" class="text-slate-400 py-8 text-center">Memuat data barang...</div>
         <div id="product-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
       </main>
-
       <!-- Section Testimoni / Review Pelanggan -->
       <section class="mt-14 mb-8">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-slate-800 pb-4">
@@ -221,61 +257,63 @@
         </div>
       </section>
     </div>
-
-    <!-- Modal Checkout Form -->
-    <div id="cart-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-      <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl relative overflow-hidden">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
-          <div class="flex items-center gap-2">
-            <img src="./logo.jpeg" alt="Logo" class="w-6 h-6 rounded-md">
-            <h3 class="font-bold text-lg text-amber-400" id="cart-item-name">Detail Pesanan</h3>
+    
+    <!-- FITUR 4: Modal Checkout Form Beranimasi Glassmorphism + Gradient Border -->
+    <div id="cart-modal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-xl flex items-center justify-center p-4 z-50">
+      <div class="animated-border p-[2px] rounded-3xl max-w-md w-full shadow-2xl modal-scale-up">
+        <div class="animated-border-content bg-slate-900/90 backdrop-blur-md rounded-3xl p-6 relative overflow-hidden">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+            <div class="flex items-center gap-2">
+              <img src="./logo.jpeg" alt="Logo" class="w-6 h-6 rounded-md">
+              <h3 class="font-bold text-lg text-amber-400" id="cart-item-name">Detail Pesanan</h3>
+            </div>
+            <button onclick="closeCartModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
           </div>
-          <button onclick="closeCartModal()" class="text-slate-400 hover:text-white text-lg">✕</button>
+          
+          <form onsubmit="sendToWA(event)" class="space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-xs text-slate-400 mb-1 block">Harga Satuan</label>
+                <div class="text-base font-bold text-white" id="cart-item-price">Rp 0</div>
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 mb-1 block">Jumlah / Qty</label>
+                <input type="number" id="cart-qty" min="1" value="1" oninput="calculateTotal()" required class="w-full bg-slate-950/80 border border-slate-800 p-2 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
+              </div>
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">Nama Pembeli</label>
+              <input type="text" id="buyer-name" placeholder="Masukkan nama kamu" required class="w-full bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-xs text-slate-400 mb-1 block">GrowID / ID Game</label>
+                <input type="text" id="buyer-game-id" placeholder="Contoh: Azka07" required class="w-full bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 mb-1 block">World Name</label>
+                <input type="text" id="buyer-world" placeholder="Contoh: TAASTORE" required class="w-full bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
+              </div>
+            </div>
+            <div>
+              <label class="text-xs text-slate-400 mb-1 block">Metode Pembayaran</label>
+              <select id="buyer-payment" class="w-full bg-slate-950/80 border border-slate-800 p-2.5 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
+                <option value="QRIS">QRIS All Payment</option>
+                <option value="BCA">Bank BCA</option>
+                <option value="DANA">DANA</option>
+                <option value="GOPAY">GoPay</option>
+                <option value="Seabank">Seabank</option>
+              </select>
+            </div>
+            <div class="bg-slate-950/90 p-3.5 rounded-2xl border border-slate-800 mt-2">
+              <div class="text-xs text-slate-400 mb-0.5">Total Pembayaran:</div>
+              <div class="text-2xl font-black text-amber-400" id="cart-total-price">Rp 0</div>
+            </div>
+            <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-2xl transition mt-2 shadow-lg shadow-amber-500/20">
+              Kirim Pesanan ke WhatsApp CS
+            </button>
+          </form>
         </div>
-        
-        <form onsubmit="sendToWA(event)" class="space-y-3">
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="text-xs text-slate-400 mb-1 block">Harga Satuan</label>
-              <div class="text-base font-bold text-white" id="cart-item-price">Rp 0</div>
-            </div>
-            <div>
-              <label class="text-xs text-slate-400 mb-1 block">Jumlah / Qty</label>
-              <input type="number" id="cart-qty" min="1" value="1" oninput="calculateTotal()" required class="w-full bg-slate-950 border border-slate-800 p-2 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
-            </div>
-          </div>
-          <div>
-            <label class="text-xs text-slate-400 mb-1 block">Nama Pembeli</label>
-            <input type="text" id="buyer-name" placeholder="Masukkan nama kamu" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="text-xs text-slate-400 mb-1 block">GrowID / ID Game</label>
-              <input type="text" id="buyer-game-id" placeholder="Contoh: Azka07" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
-            </div>
-            <div>
-              <label class="text-xs text-slate-400 mb-1 block">World Name</label>
-              <input type="text" id="buyer-world" placeholder="Contoh: TAASTORE" required class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
-            </div>
-          </div>
-          <div>
-            <label class="text-xs text-slate-400 mb-1 block">Metode Pembayaran</label>
-            <select id="buyer-payment" class="w-full bg-slate-950 border border-slate-800 p-2.5 rounded-xl text-white text-sm focus:outline-none focus:border-amber-400">
-              <option value="QRIS">QRIS All Payment</option>
-              <option value="BCA">Bank BCA</option>
-              <option value="DANA">DANA</option>
-              <option value="GOPAY">GoPay</option>
-              <option value="Seabank">Seabank</option>
-            </select>
-          </div>
-          <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 mt-2">
-            <div class="text-xs text-slate-400 mb-0.5">Total Pembayaran:</div>
-            <div class="text-2xl font-black text-amber-400" id="cart-total-price">Rp 0</div>
-          </div>
-          <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-2xl transition mt-2 shadow-lg shadow-amber-500/20">
-            Kirim Pesanan ke WhatsApp CS
-          </button>
-        </form>
       </div>
     </div>
 
@@ -315,6 +353,16 @@
       <span id="toast-message">Notifikasi</span>
     </div>
 
+    <!-- FITUR 3: Tombol Sound Mute/Unmute Toggle di Pojok Layar -->
+    <button 
+      id="sound-toggle-btn"
+      onclick="toggleAudio()" 
+      class="fixed bottom-5 right-5 bg-slate-900/90 backdrop-blur-md border border-slate-800 text-amber-400 hover:text-amber-300 px-3.5 py-2 rounded-full shadow-2xl flex items-center gap-2 text-xs font-semibold transition hover:scale-105 z-40"
+      title="Toggle Suara Cyberpunk"
+    >
+      <span id="sound-icon">🔊</span> SFX: <span id="sound-status">ON</span>
+    </button>
+
     <!-- Tombol Kritik & Saran CS -->
     <a 
       href="https://wa.me/6282123602358?text=Halo%20CS%20TAASTORE,%20saya%20ingin%20memberikan%20kritik%20dan%20saran:" 
@@ -335,6 +383,45 @@
     let selectedItem = null;
     const defaultReviews = [];
 
+    /* FITUR 3: Audio Synthesizer (Retro Cyber Beep / Click SFX) */
+    let soundEnabled = true;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playCyberBeep(freq = 800, type = 'sine', duration = 0.05) {
+      if (!soundEnabled) return;
+      try {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.03, audioCtx.currentTime); // Suara dibuat sangat pelan & halus
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.log("Audio not allowed yet");
+      }
+    }
+
+    function toggleAudio() {
+      soundEnabled = !soundEnabled;
+      const statusText = document.getElementById("sound-status");
+      const iconText = document.getElementById("sound-icon");
+      if (soundEnabled) {
+        statusText.innerText = "ON";
+        iconText.innerText = "🔊";
+        playCyberBeep(1200, 'sine', 0.08);
+      } else {
+        statusText.innerText = "OFF";
+        iconText.innerText = "🔇";
+      }
+    }
+
     async function loadItems() {
       try {
         const response = await fetch(`${API_URL}/items`);
@@ -348,20 +435,19 @@
         }
       }
     }
-
     function showToast(message, isError = false) {
       const toast = document.getElementById("toast");
       const toastMessage = document.getElementById("toast-message");
       
       toastMessage.innerText = message;
-      toast.className = `fixed bottom-5 right-5 block ${isError ? 'bg-rose-600 border-rose-400/30' : 'bg-emerald-600 border-emerald-400/30'} text-white px-5 py-3 rounded-xl shadow-2xl font-medium transition-all duration-300 z-50 border`;
+      toast.className = `fixed bottom-20 right-5 block ${isError ? 'bg-rose-600 border-rose-400/30' : 'bg-emerald-600 border-emerald-400/30'} text-white px-5 py-3 rounded-xl shadow-2xl font-medium transition-all duration-300 z-50 border`;
       
       setTimeout(() => {
         toast.className = toast.className.replace("block", "hidden");
       }, 3000);
     }
-
     function toggleLike(btn) {
+      playCyberBeep(1000, 'sine', 0.06);
       const countEl = btn.querySelector('.like-count');
       let currentLikes = parseInt(countEl.innerText);
       
@@ -378,8 +464,8 @@
         showToast("Terima kasih atas respons positifnya! ❤️");
       }
     }
-
     function setFilter(type) {
+      playCyberBeep(600, 'triangle', 0.04); // SFX Tab Switch
       activeFilter = type;
       
       const btnAll = document.getElementById('filter-all');
@@ -394,7 +480,6 @@
       
       filterProducts();
     }
-
     function filterProducts() {
       const searchInput = document.getElementById("search-input");
       const searchKeyword = searchInput ? searchInput.value.toLowerCase() : "";
@@ -406,7 +491,6 @@
       });
       renderProducts(filtered);
     }
-
     function renderProducts(data) {
       const container = document.getElementById("product-list");
       const loading = document.getElementById("loading");
@@ -418,6 +502,13 @@
       }
       data.forEach(item => {
         const card = document.createElement("div");
+        // FITUR 2: Menambahkan atribut data-tilt untuk Vanilla-Tilt.js
+        card.setAttribute("data-tilt", "");
+        card.setAttribute("data-tilt-max", "12");
+        card.setAttribute("data-tilt-speed", "400");
+        card.setAttribute("data-tilt-glare", "true");
+        card.setAttribute("data-tilt-max-glare", "0.25");
+        
         card.className = "bg-slate-900/80 backdrop-blur-md p-5 rounded-2xl border border-slate-800/80 shadow-xl flex flex-col justify-between relative overflow-hidden group hover:border-amber-500/30 transition duration-300";
         
         let stockBadge = `<span class="bg-emerald-950/80 text-emerald-400 border border-emerald-800/50 text-[10px] font-bold px-2 py-0.5 rounded-md">READY</span>`;
@@ -476,6 +567,11 @@
         `;
         container.appendChild(card);
       });
+
+      // FITUR 2: Inisialisasi Vanilla-Tilt pada setiap elemen kartu yang dirender
+      if (window.VanillaTilt) {
+        VanillaTilt.init(document.querySelectorAll("#product-list [data-tilt]"));
+      }
     }
 
     function loadReviews() {
@@ -511,15 +607,17 @@
         container.appendChild(card);
       });
     }
-
     function openReviewModal() {
+      playCyberBeep(700, 'sine', 0.05);
       document.getElementById("review-modal").classList.remove("hidden");
     }
     function closeReviewModal() {
+      playCyberBeep(400, 'sine', 0.04);
       document.getElementById("review-modal").classList.add("hidden");
     }
     function submitReview(e) {
       e.preventDefault();
+      playCyberBeep(1200, 'sine', 0.08);
       const name = document.getElementById("review-name").value;
       const rating = parseInt(document.getElementById("review-rating").value);
       const comment = document.getElementById("review-comment").value;
@@ -538,8 +636,8 @@
       document.getElementById("review-name").value = "";
       document.getElementById("review-comment").value = "";
     }
-
     function openCartModal(id) {
+      playCyberBeep(900, 'sine', 0.06); // FITUR 3: SFX saat klik Beli
       selectedItem = itemsData.find(i => i.id === id);
       if (!selectedItem) return;
       document.getElementById("cart-item-name").innerText = selectedItem.name;
@@ -549,6 +647,7 @@
       document.getElementById("cart-modal").classList.remove("hidden");
     }
     function closeCartModal() {
+      playCyberBeep(350, 'sine', 0.04);
       document.getElementById("cart-modal").classList.add("hidden");
       selectedItem = null;
     }
@@ -560,6 +659,7 @@
     }
     function sendToWA(e) {
       e.preventDefault();
+      playCyberBeep(1100, 'square', 0.1);
       if (!selectedItem) return;
       const qty = parseInt(document.getElementById("cart-qty").value) || 1;
       const total = selectedItem.price * qty;
@@ -583,8 +683,8 @@ Mohon diproses min, terima kasih! 🙏`;
       window.open(`https://wa.me/6282123602358?text=${waText}`, '_blank');
       closeCartModal();
     }
-
     function toggleAdminPanel() {
+      playCyberBeep(800, 'sawtooth', 0.05);
       if (!isAdmin) {
         const inputPassword = prompt("Masukkan Password Admin TAASTORE:");
         if (inputPassword === "TAASTORE.ID") {
@@ -599,7 +699,6 @@ Mohon diproses min, terima kasih! 🙏`;
         }
       }
     }
-
     function logoutAdmin() {
       isAdmin = false;
       adminKey = "";
@@ -609,7 +708,6 @@ Mohon diproses min, terima kasih! 🙏`;
       resetForm();
       filterProducts();
     }
-
     function editItem(id) {
       const item = itemsData.find(i => i.id === id);
       if (item) {
@@ -623,7 +721,6 @@ Mohon diproses min, terima kasih! 🙏`;
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
-
     async function saveItem(e) {
       e.preventDefault();
       const id = document.getElementById("item-id").value;
@@ -653,7 +750,6 @@ Mohon diproses min, terima kasih! 🙏`;
       resetForm();
       loadItems();
     }
-
     async function deleteItem(id) {
       if (confirm("Yakin ingin menghapus produk ini?")) {
         await fetch(`${API_URL}/items/${id}`, {
@@ -663,7 +759,6 @@ Mohon diproses min, terima kasih! 🙏`;
         loadItems();
       }
     }
-
     function resetForm() {
       document.getElementById("item-id").value = "";
       document.getElementById("item-name").value = "";
@@ -673,17 +768,15 @@ Mohon diproses min, terima kasih! 🙏`;
       document.getElementById("item-status").value = "ready";
       document.getElementById("form-btn").innerText = "Tambah Produk";
     }
-
     loadItems();
     loadReviews();
   </script>
 
-<!-- Script Animasi Canvas Bintang Jatuh Endless (Multi-Color Cyber Palette) -->
+  <!-- FITUR 1: Script Interactive Cursor Glow & Particle Trail -->
   <script>
     (function () {
-      const canvas = document.getElementById('starCanvas');
+      const canvas = document.getElementById('cursorCanvas');
       const ctx = canvas.getContext('2d');
-
       let width = (canvas.width = window.innerWidth);
       let height = (canvas.height = window.innerHeight);
 
@@ -692,6 +785,73 @@ Mohon diproses min, terima kasih! 🙏`;
         height = canvas.height = window.innerHeight;
       });
 
+      const particles = [];
+      const mouse = { x: -100, y: -100 };
+
+      window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+
+        for (let i = 0; i < 2; i++) {
+          particles.push({
+            x: mouse.x,
+            y: mouse.y,
+            size: Math.random() * 3.5 + 1,
+            color: Math.random() > 0.5 ? 'rgba(6, 182, 212, ' : 'rgba(245, 158, 11, ', // Cyan & Amber
+            alpha: 0.6,
+            vx: (Math.random() - 0.5) * 1.2,
+            vy: (Math.random() - 0.5) * 1.2
+          });
+        }
+      });
+
+      function renderCursorTrail() {
+        ctx.clearRect(0, 0, width, height);
+
+        // Ambient Cursor Glow
+        if (mouse.x > 0 && mouse.y > 0) {
+          const radial = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 35);
+          radial.addColorStop(0, 'rgba(6, 182, 212, 0.2)');
+          radial.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = radial;
+          ctx.beginPath();
+          ctx.arc(mouse.x, mouse.y, 35, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Particle Trail Update & Draw
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.alpha -= 0.025;
+
+          if (p.alpha <= 0) {
+            particles.splice(i, 1);
+          } else {
+            ctx.fillStyle = `${p.color}${p.alpha})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        requestAnimationFrame(renderCursorTrail);
+      }
+      renderCursorTrail();
+    })();
+  </script>
+
+  <!-- Script Animasi Canvas Bintang Jatuh Endless (Multi-Color Cyber Palette) -->
+  <script>
+    (function () {
+      const canvas = document.getElementById('starCanvas');
+      const ctx = canvas.getContext('2d');
+      let width = (canvas.width = window.innerWidth);
+      let height = (canvas.height = window.innerHeight);
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
       // Palet warna bintang jatuh (Cyan, Amber, Magenta, Silver)
       const colorPalette = [
         { head: 'rgba(245, 158, 11, ', body: 'rgba(251, 191, 36, ', glow: '#f59e0b' }, // Amber / Emas
@@ -699,10 +859,8 @@ Mohon diproses min, terima kasih! 🙏`;
         { head: 'rgba(236, 72, 153, ', body: 'rgba(244, 114, 182, ', glow: '#ec4899' }, // Magenta / Pink Neon
         { head: 'rgba(255, 255, 255, ', body: 'rgba(226, 232, 240, ', glow: '#ffffff' }  // Silver / White
       ];
-
       const starCount = 20;
       const stars = [];
-
       function createStar() {
         const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
         return {
@@ -715,31 +873,24 @@ Mohon diproses min, terima kasih! 🙏`;
           color: color
         };
       }
-
       for (let i = 0; i < starCount; i++) {
         stars.push(createStar());
       }
-
       const angle = Math.PI / 4; // Sudut kemiringan 45 derajat
       const cosA = Math.cos(angle);
       const sinA = Math.sin(angle);
-
       function animate() {
         ctx.clearRect(0, 0, width, height);
-
         stars.forEach((star) => {
           star.x += star.speed * cosA;
           star.y += star.speed * sinA;
-
           const tailX = star.x - star.length * cosA;
           const tailY = star.y - star.length * sinA;
-
           // Gradasi warna ekor mengikuti palet warna masing-masing bintang
           const gradient = ctx.createLinearGradient(star.x, star.y, tailX, tailY);
           gradient.addColorStop(0, `${star.color.head}${star.opacity})`);
           gradient.addColorStop(0.35, `${star.color.body}${star.opacity * 0.45})`);
           gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
           // Menggambar ekor bintang
           ctx.beginPath();
           ctx.moveTo(star.x, star.y);
@@ -748,7 +899,6 @@ Mohon diproses min, terima kasih! 🙏`;
           ctx.lineWidth = star.size;
           ctx.lineCap = 'round';
           ctx.stroke();
-
           // Menggambar kepala bintang yang bersinar (Glow effect)
           ctx.beginPath();
           ctx.arc(star.x, star.y, star.size * 1.2, 0, Math.PI * 2);
@@ -757,16 +907,13 @@ Mohon diproses min, terima kasih! 🙏`;
           ctx.shadowColor = star.color.glow;
           ctx.fill();
           ctx.shadowBlur = 0;
-
           // Reset posisi saat keluar dari layar (Looping Endless)
           if (star.y > height + 100 || star.x > width + 100) {
             Object.assign(star, createStar());
           }
         });
-
         requestAnimationFrame(animate);
       }
-
       animate();
     })();
   </script>
