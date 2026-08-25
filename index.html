@@ -82,7 +82,7 @@
 
     /* FITUR EASTER EGG: Overdrive Mode Theme Injection */
     .overdrive-mode {
-      filter: hue-rotate(90deg) contrast(1.15) brightness(1.1);
+      filter: hue-rotate(90deg) contrast(1.25) brightness(1.1);
       transition: filter 0.8s ease-in-out;
     }
     @keyframes glitch {
@@ -94,7 +94,7 @@
       100% { transform: translate(0); }
     }
     .glitch-anim {
-      animation: glitch 0.2s ease infinite;
+      animation: glitch 0.15s ease infinite;
     }
   </style>
 </head>
@@ -112,8 +112,8 @@
   <div class="fixed -bottom-32 -right-32 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
   
   <!-- FITUR EASTER EGG: Banner Floating Banner Notifikasi Overdrive Rahasia -->
-  <div id="overdrive-banner" class="hidden fixed top-0 left-0 right-0 bg-gradient-to-r from-pink-600 via-purple-600 to-cyan-500 text-white font-black text-xs text-center py-2 z-50 tracking-widest uppercase shadow-2xl glitch-anim">
-    ⚡ OVERDRIVE RAMPAGE MODE ACTIVATED! (YOU FOUND THE EASTER EGG!) ⚡
+  <div id="overdrive-banner" class="hidden fixed top-0 left-0 right-0 bg-gradient-to-r from-red-600 via-pink-600 to-purple-600 text-white font-black text-xs text-center py-2 z-50 tracking-widest uppercase shadow-2xl glitch-anim">
+    ⚠️ WARNING: OVERDRIVE RAMPAGE MODE ACTIVATED! SYSTEM OVERHEAT! (PRESS 'TAA' TO ESCAPE) ⚠️
   </div>
 
   <!-- Main Wrapper -->
@@ -156,7 +156,7 @@
             onclick="toggleCyberBGM()" 
             class="flex items-center gap-2 px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-semibold transition shadow-[0_0_10px_rgba(6,182,212,0.1)] hover:shadow-[0_0_15px_rgba(6,182,212,0.3)]">
             <i id="bgm-icon" class="fa-solid fa-compact-disc"></i>
-            <span id="bgm-text" class="hidden sm:inline">Play Cyber BGM</span>
+            <span id="bgm-text" class="hidden sm:inline">Play Chill BGM</span>
           </button>
 
           <!-- Saluran WhatsApp -->
@@ -194,7 +194,6 @@
         </div>
         <div class="relative z-10 text-xs text-amber-400 bg-amber-500/10 px-3.5 py-2 rounded-xl border border-amber-500/30 font-medium flex items-center gap-2">
           <span>⚡ Garansi Proses Cepat</span>
-          <!-- Hint Easter Egg Ketik TAA -->
           <span class="text-[10px] text-slate-500 hover:text-cyan-400 transition cursor-help" title="Ketik 'TAA' di keyboard untuk mengaktifkan Overdrive Mode!">(Hint: TAA)</span>
         </div>
       </div>
@@ -794,12 +793,15 @@ Mohon diproses min, terima kasih! 🙏`;
     loadReviews();
   </script>
 
-  <!-- FITUR 1: CYBER-AUDIO REACTIVE VISUALIZER & SYNTHESIZER MUSIC PLAYER -->
+  <!-- FITUR 1 & FITUR 2: CYBER-AUDIO REACTIVE VISUALIZER, LO-FI CHILL BGM & OVERDRIVE PANIC SIREN ENGINE -->
   <script>
     let isBgmPlaying = false;
     let bgmOscillator = null;
     let bgmGain = null;
     let bgmLfo = null;
+    let panicOscillator = null;
+    let panicGain = null;
+    let panicLfo = null;
     let visualizerAnimationId = null;
 
     // Canvas Visualizer Engine
@@ -820,62 +822,124 @@ Mohon diproses min, terima kasih! 🙏`;
       if (!isBgmPlaying) {
         startCyberBGM();
         isBgmPlaying = true;
-        btnText.innerText = "Stop Cyber BGM";
+        btnText.innerText = "Stop Chill BGM";
         btnIcon.className = "fa-solid fa-pause text-amber-400 animate-spin";
-        showToast("🎵 Cyber Ambient Music Started!");
+        showToast("🎵 Chill Cyber Ambient Started!");
       } else {
         stopCyberBGM();
         isBgmPlaying = false;
-        btnText.innerText = "Play Cyber BGM";
+        btnText.innerText = "Play Chill BGM";
         btnIcon.className = "fa-solid fa-compact-disc";
         showToast("⏸️ Cyber BGM Paused");
       }
     }
 
+    // 1. CHILL CHILL AMBIENT BGM (Frekuensi 55Hz Sub-Bass Sine Wave)
     function startCyberBGM() {
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
+      try {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        stopCyberBGM(); // Clean up existing
+
+        bgmOscillator = audioCtx.createOscillator();
+        bgmGain = audioCtx.createGain();
+        bgmLfo = audioCtx.createOscillator();
+
+        bgmOscillator.type = 'sine'; // Suara santai & lembut di telinga
+        bgmOscillator.frequency.setValueAtTime(55, audioCtx.currentTime); // Low Sub-bass A1
+
+        bgmLfo.type = 'sine';
+        bgmLfo.frequency.setValueAtTime(0.2, audioCtx.currentTime); // Pulsasi sangat lambat
+        
+        const lfoGain = audioCtx.createGain();
+        lfoGain.gain.setValueAtTime(0.005, audioCtx.currentTime);
+
+        bgmLfo.connect(lfoGain);
+        lfoGain.connect(bgmGain.gain);
+
+        bgmGain.gain.setValueAtTime(0.015, audioCtx.currentTime); // Volume rendah tidak mengganggu
+
+        bgmOscillator.connect(bgmGain);
+        bgmGain.connect(audioCtx.destination);
+
+        bgmOscillator.start();
+        bgmLfo.start();
+
+        renderAudioVisualizer();
+      } catch(e) {
+        console.log("Audio play prevented:", e);
       }
-      // Membuat Synthwave Ambient Drone 440Hz dengan Modulasi LFO
-      bgmOscillator = audioCtx.createOscillator();
-      bgmGain = audioCtx.createGain();
-      bgmLfo = audioCtx.createOscillator();
-
-      bgmOscillator.type = 'sawtooth';
-      bgmOscillator.frequency.setValueAtTime(110, audioCtx.currentTime); // Low Synth Note (A2)
-
-      // LFO Tremolo / Pulse
-      bgmLfo.frequency.setValueAtTime(3, audioCtx.currentTime); // 3Hz pulse
-      const lfoGain = audioCtx.createGain();
-      lfoGain.gain.setValueAtTime(0.015, audioCtx.currentTime);
-
-      bgmLfo.connect(lfoGain);
-      lfoGain.connect(bgmGain.gain);
-
-      bgmGain.gain.setValueAtTime(0.02, audioCtx.currentTime); // Suara ambient latar belakang tetap lembut
-
-      bgmOscillator.connect(bgmGain);
-      bgmGain.connect(audioCtx.destination);
-
-      bgmOscillator.start();
-      bgmLfo.start();
-
-      renderAudioVisualizer();
     }
 
     function stopCyberBGM() {
-      if (bgmOscillator) {
-        bgmOscillator.stop();
-        bgmOscillator.disconnect();
-      }
-      if (bgmLfo) {
-        bgmLfo.stop();
-        bgmLfo.disconnect();
-      }
+      try {
+        if (bgmOscillator) {
+          bgmOscillator.stop();
+          bgmOscillator.disconnect();
+          bgmOscillator = null;
+        }
+        if (bgmLfo) {
+          bgmLfo.stop();
+          bgmLfo.disconnect();
+          bgmLfo = null;
+        }
+      } catch(e){}
+      
       if (visualizerAnimationId) {
         cancelAnimationFrame(visualizerAnimationId);
       }
       visCtx.clearRect(0, 0, vWidth, vHeight);
+    }
+
+    // 2. FITUR 2: OVERDRIVE PANIC SIREN AUDIO ENGINE (Membuat kepanikan saat Overdrive Mode Aktif)
+    function startPanicSiren() {
+      try {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        stopPanicSiren();
+
+        panicOscillator = audioCtx.createOscillator();
+        panicGain = audioCtx.createGain();
+        panicLfo = audioCtx.createOscillator();
+
+        panicOscillator.type = 'sawtooth'; // Suara tajam khas sirine bahaya
+        panicOscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+
+        // Modulasi Alarm Sirine Cepat (4Hz) naik-turun pitch
+        panicLfo.type = 'sawtooth';
+        panicLfo.frequency.setValueAtTime(4, audioCtx.currentTime); 
+        
+        const panicLfoGain = audioCtx.createGain();
+        panicLfoGain.gain.setValueAtTime(300, audioCtx.currentTime); // Sweep pitch naik turun tajam
+
+        panicLfo.connect(panicLfoGain);
+        panicLfoGain.connect(panicOscillator.frequency);
+
+        panicGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+
+        panicOscillator.connect(panicGain);
+        panicGain.connect(audioCtx.destination);
+
+        panicOscillator.start();
+        panicLfo.start();
+      } catch(e) {}
+    }
+
+    function stopPanicSiren() {
+      try {
+        if (panicOscillator) {
+          panicOscillator.stop();
+          panicOscillator.disconnect();
+          panicOscillator = null;
+        }
+        if (panicLfo) {
+          panicLfo.stop();
+          panicLfo.disconnect();
+          panicLfo = null;
+        }
+      } catch(e) {}
     }
 
     function renderAudioVisualizer() {
@@ -883,16 +947,15 @@ Mohon diproses min, terima kasih! 🙏`;
       
       const bars = 48;
       const barWidth = vWidth / bars;
-      const time = Date.now() * 0.003;
+      const time = Date.now() * 0.0015;
 
       for (let i = 0; i < bars; i++) {
-        // Simulasi Equalizer Bar Berdasarkan Frekuensi Audio Real-Time
-        const barHeight = Math.sin(time + i * 0.2) * 50 + Math.cos(time * 0.5 + i * 0.1) * 30 + 60;
+        const barHeight = Math.sin(time + i * 0.15) * 35 + Math.cos(time * 0.3 + i * 0.1) * 20 + 45;
         
         const gradient = visCtx.createLinearGradient(0, vHeight, 0, vHeight - barHeight);
         gradient.addColorStop(0, 'rgba(6, 182, 212, 0)');
-        gradient.addColorStop(0.5, 'rgba(6, 182, 212, 0.25)');
-        gradient.addColorStop(1, 'rgba(245, 158, 11, 0.6)');
+        gradient.addColorStop(0.5, 'rgba(6, 182, 212, 0.2)');
+        gradient.addColorStop(1, 'rgba(245, 158, 11, 0.4)');
 
         visCtx.fillStyle = gradient;
         visCtx.fillRect(i * barWidth, vHeight - barHeight, barWidth - 3, barHeight);
@@ -900,14 +963,25 @@ Mohon diproses min, terima kasih! 🙏`;
 
       visualizerAnimationId = requestAnimationFrame(renderAudioVisualizer);
     }
+
+    // FITUR 3 STABILITAS & UX: Auto Pause Audio Saat User Pindah Tab
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        if (isBgmPlaying) stopCyberBGM();
+        stopPanicSiren();
+      } else {
+        if (isBgmPlaying && !window.isOverdriveActive) startCyberBGM();
+        if (window.isOverdriveActive) startPanicSiren();
+      }
+    });
   </script>
 
-  <!-- FITUR 3: HOLOGRAPHIC EASTER EGG OVERDRIVE MODE (Ketik "TAA") -->
+  <!-- FITUR EASTER EGG OVERDRIVE MODE (Ketik "TAA") & PANIC MODE INTEGRATION -->
   <script>
     (function () {
       const secretCode = ['t', 'a', 'a'];
       let inputBuffer = [];
-      let isOverdrive = false;
+      window.isOverdriveActive = false;
 
       window.addEventListener('keydown', (e) => {
         inputBuffer.push(e.key.toLowerCase());
@@ -924,19 +998,26 @@ Mohon diproses min, terima kasih! 🙏`;
         const body = document.getElementById('main-body');
         const banner = document.getElementById('overdrive-banner');
 
-        isOverdrive = !isOverdrive;
+        window.isOverdriveActive = !window.isOverdriveActive;
 
-        if (isOverdrive) {
+        if (window.isOverdriveActive) {
           body.classList.add('overdrive-mode');
           banner.classList.remove('hidden');
-          playCyberBeep(1500, 'sawtooth', 0.2);
-          setTimeout(() => playCyberBeep(2000, 'sawtooth', 0.3), 150);
-          showToast("🔥 OVERDRIVE MODE UNLOCKED! Enjoy the Cyber Rampage!");
+          
+          // Stop BGM normal & Nyalakan Panic Siren Audio secara terus menerus!
+          stopCyberBGM();
+          startPanicSiren();
+          
+          showToast("⚠️ OVERDRIVE RAMPAGE UNLOCKED! SYSTEM OVERHEAT!");
         } else {
           body.classList.remove('overdrive-mode');
           banner.classList.add('hidden');
-          playCyberBeep(500, 'sine', 0.1);
-          showToast("✨ Overdrive Mode Deactivated.");
+          
+          // Matikan Panic Siren & kembalikan audio normal jika aktif
+          stopPanicSiren();
+          if (isBgmPlaying) startCyberBGM();
+
+          showToast("✨ Overdrive Mode Deactivated. System Normal.");
         }
       }
     })();
